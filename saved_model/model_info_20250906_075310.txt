@@ -1,0 +1,51 @@
+Heart Disease Risk Prediction Model
+======================================
+Model Type: RandomForestClassifier
+Training Date: 2025-09-06 07:53:10
+Number of Features: 20
+Training Samples: 13333
+Target Classes: [0, 1]
+Timestamp: 20250906_075310
+
+Feature Names:
+  1. Age
+  2. Gender
+  3. Blood Pressure
+  4. Cholesterol Level
+  5. Exercise Habits
+  6. Smoking
+  7. Family Heart Disease
+  8. Diabetes
+  9. BMI
+  10. High Blood Pressure
+  11. Low HDL Cholesterol
+  12. High LDL Cholesterol
+  13. Alcohol Consumption
+  14. Stress Level
+  15. Sleep Hours
+  16. Sugar Consumption
+  17. Triglyceride Level
+  18. Fasting Blood Sugar
+  19. CRP Level
+  20. Homocysteine Level
+
+Model Parameters:
+  bootstrap: False
+  ccp_alpha: 0.0
+  class_weight: {0: 1, 1: 1.5}
+  criterion: gini
+  max_depth: 30
+  max_features: sqrt
+  max_leaf_nodes: None
+  max_samples: None
+  min_impurity_decrease: 0.0
+  min_samples_leaf: 1
+  min_samples_split: 5
+  min_weight_fraction_leaf: 0.0
+  monotonic_cst: None
+  n_estimators: 150
+  n_jobs: None
+  oob_score: False
+  random_state: 42
+  verbose: 0
+  warm_start: False

@@ -1,0 +1,140 @@
+{
+  "diet_plan": {
+    "vegetarian": {
+      "low_risk": {
+        "breakfast": [
+          {"name": "Vegetable Upma", "image_url": "images/veg_upma.jpg", "calories": 220},
+          {"name": "Idli with Sambar", "image_url": "images/idli_sambar.jpg", "calories": 250},
+          {"name": "Oats with milk and fruits", "image_url": "images/oats_fruits.jpg", "calories": 280}
+        ],
+        "lunch": [
+          {"name": "Chapati with Dal and Mixed Veg Curry", "image_url": "images/chapati_dal_veg.jpg", "calories": 350},
+          {"name": "Curd Rice with salad", "image_url": "images/curd_rice_salad.jpg", "calories": 400},
+          {"name": "Vegetable Pulao with Raita", "image_url": "images/veg_pulao_raita.jpg", "calories": 420}
+        ],
+        "snacks": [
+          {"name": "Roasted Chana", "image_url": "images/roasted_chana.jpg", "calories": 120},
+          {"name": "Fruit Chaat", "image_url": "images/fruit_chaat.jpg", "calories": 150},
+          {"name": "Sprouts Salad", "image_url": "images/sprouts_salad.jpg", "calories": 160}
+        ],
+        "dinner": [
+          {"name": "Phulka with Palak Paneer (low oil)", "image_url": "images/phulka_palak_paneer.jpg", "calories": 330},
+          {"name": "Khichdi with curd", "image_url": "images/khichdi_curd.jpg", "calories": 340},
+          {"name": "Vegetable Daliya", "image_url": "images/veg_daliya.jpg", "calories": 300}
+        ]
+      },
+      "moderate_risk": {
+        "breakfast": [
+          {"name": "Moong Dal Chilla", "image_url": "images/moong_dal_chilla.jpg", "calories": 200},
+          {"name": "Poha with vegetables", "image_url": "images/poha.jpg", "calories": 250},
+          {"name": "Oats porridge with flax seeds", "image_url": "images/oats_flax.jpg", "calories": 270}
+        ],
+        "lunch": [
+          {"name": "2 Chapati + Dal + Lauki Curry", "image_url": "images/chapati_dal_lauki.jpg", "calories": 360},
+          {"name": "Brown Rice with Rajma (light oil)", "image_url": "images/brownrice_rajma.jpg", "calories": 420},
+          {"name": "Vegetable Khichdi with salad", "image_url": "images/veg_khichdi_salad.jpg", "calories": 380}
+        ],
+        "snacks": [
+          {"name": "Buttermilk", "image_url": "images/buttermilk.jpg", "calories": 100},
+          {"name": "Papaya slices", "image_url": "images/papaya.jpg", "calories": 80},
+          {"name": "Steamed Corn with lemon", "image_url": "images/steamed_corn.jpg", "calories": 140}
+        ],
+        "dinner": [
+          {"name": "Roti with Bottle Gourd Curry", "image_url": "images/roti_bottle_gourd.jpg", "calories": 320},
+          {"name": "Vegetable Oats Khichdi", "image_url": "images/veg_oats_khichdi.jpg", "calories": 330},
+          {"name": "Curd with boiled vegetables", "image_url": "images/curd_boiled_veg.jpg", "calories": 210}
+        ]
+      },
+      "high_risk": {
+        "breakfast": [
+          {"name": "Plain Daliya with vegetables", "image_url": "images/plain_daliya.jpg", "calories": 180},
+          {"name": "Oats with skimmed milk", "image_url": "images/oats_skimmedmilk.jpg", "calories": 200},
+          {"name": "Steamed Idli with tomato chutney", "image_url": "images/idli_tomatochutney.jpg", "calories": 210}
+        ],
+        "lunch": [
+          {"name": "2 Phulka with Tinda Curry", "image_url": "images/phulka_tinda.jpg", "calories": 300},
+          {"name": "Brown Rice with Moong Dal", "image_url": "images/brownrice_moongdal.jpg", "calories": 330},
+          {"name": "Vegetable stew with broken wheat", "image_url": "images/veg_stew_brokenwheat.jpg", "calories": 310}
+        ],
+        "snacks": [
+          {"name": "Green Tea with roasted Makhana", "image_url": "images/greentea_makhana.jpg", "calories": 90},
+          {"name": "Apple/Guava", "image_url": "images/apple_guava.jpg", "calories": 100},
+          {"name": "Cucumber sticks with lemon", "image_url": "images/cucumber_lemon.jpg", "calories": 60}
+        ],
+        "dinner": [
+          {"name": "Vegetable Soup with oats", "image_url": "images/veg_soup_oats.jpg", "calories": 150},
+          {"name": "Phulka with Pumpkin Curry", "image_url": "images/phulka_pumpkin.jpg", "calories": 280},
+          {"name": "Khichdi with Moong Dal (no ghee)", "image_url": "images/khichdi_moongdal.jpg", "calories": 290}
+        ]
+      }
+    },
+    "non_vegetarian": {
+      "low_risk": {
+        "breakfast": [
+          {"name": "Egg white omelette with spinach", "image_url": "images/egg_spinach_omelette.jpg", "calories": 180},
+          {"name": "Vegetable Upma", "image_url": "images/veg_upma.jpg", "calories": 220},
+          {"name": "Oats with boiled eggs", "image_url": "images/oats_boiledeggs.jpg", "calories": 260}
+        ],
+        "lunch": [
+          {"name": "Chapati with Chicken Curry (low oil)", "image_url": "images/chapati_chicken.jpg", "calories": 380},
+          {"name": "Fish Curry with brown rice", "image_url": "images/fish_brownrice.jpg", "calories": 400},
+          {"name": "Grilled Chicken with salad", "image_url": "images/grilledchicken_salad.jpg", "calories": 350}
+        ],
+        "snacks": [
+          {"name": "Boiled Eggs", "image_url": "images/boiled_eggs.jpg", "calories": 140},
+          {"name": "Fruit Chaat", "image_url": "images/fruit_chaat.jpg", "calories": 150},
+          {"name": "Roasted Chana", "image_url": "images/roasted_chana.jpg", "calories": 120}
+        ],
+        "dinner": [
+          {"name": "Roti with Fish Curry", "image_url": "images/roti_fishcurry.jpg", "calories": 360},
+          {"name": "Chicken Stew with vegetables", "image_url": "images/chicken_stew.jpg", "calories": 380},
+          {"name": "Grilled Fish with soup", "image_url": "images/grilled_fish_soup.jpg", "calories": 340}
+        ]
+      },
+      "moderate_risk": {
+        "breakfast": [
+          {"name": "Egg white bhurji with vegetables", "image_url": "images/eggwhite_bhurji.jpg", "calories": 190},
+          {"name": "Moong Dal Chilla", "image_url": "images/moong_dal_chilla.jpg", "calories": 200},
+          {"name": "Oats with flax seeds and boiled eggs", "image_url": "images/oats_flax_boiledeggs.jpg", "calories": 280}
+        ],
+        "lunch": [
+          {"name": "Chapati with Boiled Chicken Curry", "image_url": "images/chapati_boiledchicken.jpg", "calories": 370},
+          {"name": "Fish Curry with steamed rice", "image_url": "images/fish_steamedrice.jpg", "calories": 390},
+          {"name": "Grilled Chicken with vegetables", "image_url": "images/grilledchicken_veg.jpg", "calories": 360}
+        ],
+        "snacks": [
+          {"name": "Buttermilk", "image_url": "images/buttermilk.jpg", "calories": 100},
+          {"name": "Papaya slices", "image_url": "images/papaya.jpg", "calories": 80},
+          {"name": "Sprouts with lemon", "image_url": "images/sprouts_lemon.jpg", "calories": 150}
+        ],
+        "dinner": [
+          {"name": "Chicken Soup with vegetables", "image_url": "images/chickensoup_veg.jpg", "calories": 250},
+          {"name": "Phulka with Fish Curry", "image_url": "images/phulka_fishcurry.jpg", "calories": 340},
+          {"name": "Vegetable stew with egg whites", "image_url": "images/vegstew_eggwhite.jpg", "calories": 280}
+        ]
+      },
+      "high_risk": {
+        "breakfast": [
+          {"name": "Steamed Idli with sambar (no oil)", "image_url": "images/idli_sambar.jpg", "calories": 210},
+          {"name": "Oats porridge with egg whites", "image_url": "images/oats_eggwhite.jpg", "calories": 230},
+          {"name": "Vegetable Daliya", "image_url": "images/veg_daliya.jpg", "calories": 200}
+        ],
+        "lunch": [
+          {"name": "Chapati with Steamed Fish Curry (no oil)", "image_url": "images/chapati_fishcurry.jpg", "calories": 320},
+          {"name": "Brown Rice with Boiled Chicken & Vegetables", "image_url": "images/brownrice_chickenveg.jpg", "calories": 360},
+          {"name": "Vegetable Khichdi with egg white", "image_url": "images/veg_khichdi_eggwhite.jpg", "calories": 310}
+        ],
+        "snacks": [
+          {"name": "Green Tea with roasted Makhana", "image_url": "images/greentea_makhana.jpg", "calories": 90},
+          {"name": "Apple/Guava", "image_url": "images/apple_guava.jpg", "calories": 100},
+          {"name": "Cucumber sticks", "image_url": "images/cucumber_sticks.jpg", "calories": 60}
+        ],
+        "dinner": [
+          {"name": "Vegetable Soup with grilled fish", "image_url": "images/veg_soup_fish.jpg", "calories": 240},
+          {"name": "Phulka with Boiled Chicken Curry", "image_url": "images/phulka_boiledchicken.jpg", "calories": 310},
+          {"name": "Oats Khichdi with vegetables", "image_url": "images/oats_khichdi_veg.jpg", "calories": 290}
+        ]
+      }
+    }
+  }
+}

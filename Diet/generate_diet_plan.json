@@ -1,0 +1,212 @@
+{
+  "diet_plan": {
+    "vegetarian": {
+      "low_risk": {
+        "breakfast": [
+          {"name": "Vegetable Upma", "image_url": "images/veg_upma.jpg", "calories": 220},
+          {"name": "Idli with Sambar", "image_url": "images/idli_sambar.jpg", "calories": 250},
+          {"name": "Oats with milk and fruits", "image_url": "images/oats_fruits.jpg", "calories": 280},
+          {"name": "Besan Chilla with Mint Chutney", "image_url": "images/besan_chilla.jpg", "calories": 240},
+          {"name": "Multigrain Toast with Avocado Spread", "image_url": "images/multigrain_avocado.jpg", "calories": 260},
+          {"name": "Ragi Dosa with Coconut Chutney", "image_url": "images/ragi_dosa.jpg", "calories": 230}
+        ],
+        "lunch": [
+          {"name": "Chapati with Dal and Mixed Veg Curry", "image_url": "images/chapati_dal_veg.jpg", "calories": 350},
+          {"name": "Curd Rice with salad", "image_url": "images/curd_rice_salad.jpg", "calories": 400},
+          {"name": "Vegetable Pulao with Raita", "image_url": "images/veg_pulao_raita.jpg", "calories": 420},
+          {"name": "Jeera Rice with Kadhi and Boondi", "image_url": "images/jeera_rice_kadhi.jpg", "calories": 450},
+          {"name": "Quinoa Salad with Roasted Vegetables", "image_url": "images/quinoa_roastedveg.jpg", "calories": 380},
+          {"name": "Methi Thepla with Yogurt", "image_url": "images/methi_thepla.jpg", "calories": 370}
+        ],
+        "snacks": [
+          {"name": "Roasted Chana", "image_url": "images/roasted_chana.jpg", "calories": 120},
+          {"name": "Fruit Chaat", "image_url": "images/fruit_chaat.jpg", "calories": 150},
+          {"name": "Sprouts Salad", "image_url": "images/sprouts_salad.jpg", "calories": 160},
+          {"name": "Makhana Roasted with Turmeric", "image_url": "images/makhana_turmeric.jpg", "calories": 110},
+          {"name": "Banana Oat Muffin (no sugar)", "image_url": "images/banana_oat_muffin.jpg", "calories": 130},
+          {"name": "Coconut Water with Chia Seeds", "image_url": "images/coconut_chia.jpg", "calories": 90}
+        ],
+        "dinner": [
+          {"name": "Phulka with Palak Paneer (low oil)", "image_url": "images/phulka_palak_paneer.jpg", "calories": 330},
+          {"name": "Khichdi with curd", "image_url": "images/khichdi_curd.jpg", "calories": 340},
+          {"name": "Vegetable Daliya", "image_url": "images/veg_daliya.jpg", "calories": 300},
+          {"name": "Lauki Chana Dal with Jowar Roti", "image_url": "images/lauki_chana_jowar.jpg", "calories": 320},
+          {"name": "Masoor Dal Soup with Multigrain Bread", "image_url": "images/masoor_soup_multigrain.jpg", "calories": 290},
+          {"name": "Stuffed Bell Pepper with Brown Rice", "image_url": "images/stuffed_bellpepper.jpg", "calories": 350}
+        ]
+      },
+      "moderate_risk": {
+        "breakfast": [
+          {"name": "Moong Dal Chilla", "image_url": "images/moong_dal_chilla.jpg", "calories": 200},
+          {"name": "Poha with vegetables", "image_url": "images/poha.jpg", "calories": 250},
+          {"name": "Oats porridge with flax seeds", "image_url": "images/oats_flax.jpg", "calories": 270},
+          {"name": "Vegetable Uttapam with Coconut Chutney", "image_url": "images/veg_uttapam.jpg", "calories": 260},
+          {"name": "Ragi Idli with Sambar", "image_url": "images/ragi_idli.jpg", "calories": 220},
+          {"name": "Semolina (Suji) Pancake with Berries", "image_url": "images/suji_pancake.jpg", "calories": 240}
+        ],
+        "lunch": [
+          {"name": "2 Chapati + Dal + Lauki Curry", "image_url": "images/chapati_dal_lauki.jpg", "calories": 360},
+          {"name": "Brown Rice with Rajma (light oil)", "image_url": "images/brownrice_rajma.jpg", "calories": 420},
+          {"name": "Vegetable Khichdi with salad", "image_url": "images/veg_khichdi_salad.jpg", "calories": 380},
+          {"name": "Bajra Roti with Bhindi Masala", "image_url": "images/bajra_bhindi.jpg", "calories": 340},
+          {"name": "Millet Pulao with Cucumber Raita", "image_url": "images/millet_pulao.jpg", "calories": 370},
+          {"name": "Tofu Stir Fry with Quinoa", "image_url": "images/tofu_quinoa.jpg", "calories": 390}
+        ],
+        "snacks": [
+          {"name": "Buttermilk", "image_url": "images/buttermilk.jpg", "calories": 100},
+          {"name": "Papaya slices", "image_url": "images/papaya.jpg", "calories": 80},
+          {"name": "Steamed Corn with lemon", "image_url": "images/steamed_corn.jpg", "calories": 140},
+          {"name": "Carrot Sticks with Hummus", "image_url": "images/carrot_hummus.jpg", "calories": 110},
+          {"name": "Roasted Pumpkin Seeds", "image_url": "images/roasted_pumpkin_seeds.jpg", "calories": 130},
+          {"name": "Herbal Tea with Almond Bites (2 pieces)", "image_url": "images/herbaltea_almonds.jpg", "calories": 100}
+        ],
+        "dinner": [
+          {"name": "Roti with Bottle Gourd Curry", "image_url": "images/roti_bottle_gourd.jpg", "calories": 320},
+          {"name": "Vegetable Oats Khichdi", "image_url": "images/veg_oats_khichdi.jpg", "calories": 330},
+          {"name": "Curd with boiled vegetables", "image_url": "images/curd_boiled_veg.jpg", "calories": 210},
+          {"name": "Mixed Lentil Soup with Millet Roti", "image_url": "images/lentil_soup_millet.jpg", "calories": 300},
+          {"name": "Stuffed Karela with Curd", "image_url": "images/stuffed_karela.jpg", "calories": 270},
+          {"name": "Cabbage & Peas Stir Fry with Jowar Roti", "image_url": "images/cabbage_peas_jowar.jpg", "calories": 290}
+        ]
+      },
+      "high_risk": {
+        "breakfast": [
+          {"name": "Plain Daliya with vegetables", "image_url": "images/plain_daliya.jpg", "calories": 180},
+          {"name": "Oats with skimmed milk", "image_url": "images/oats_skimmedmilk.jpg", "calories": 200},
+          {"name": "Steamed Idli with tomato chutney", "image_url": "images/idli_tomatochutney.jpg", "calories": 210},
+          {"name": "Moong Dal Soup with Steamed Rice Cake", "image_url": "images/moong_soup_ricecake.jpg", "calories": 190},
+          {"name": "Vegetable Ragi Porridge", "image_url": "images/veg_ragi_porridge.jpg", "calories": 170},
+          {"name": "Boiled Sweet Potato with Lime", "image_url": "images/boiled_sweetpotato.jpg", "calories": 160}
+        ],
+        "lunch": [
+          {"name": "2 Phulka with Tinda Curry", "image_url": "images/phulka_tinda.jpg", "calories": 300},
+          {"name": "Brown Rice with Moong Dal", "image_url": "images/brownrice_moongdal.jpg", "calories": 330},
+          {"name": "Vegetable stew with broken wheat", "image_url": "images/veg_stew_brokenwheat.jpg", "calories": 310},
+          {"name": "Steamed Lauki with Lemon Rice", "image_url": "images/steamed_lauki_lemonrice.jpg", "calories": 290},
+          {"name": "Cabbage & Carrot Thoran with Millet", "image_url": "images/cabbage_carrot_thoran.jpg", "calories": 280},
+          {"name": "Spinach & Moong Dal Khichdi (no oil)", "image_url": "images/spinach_moong_khichdi.jpg", "calories": 300}
+        ],
+        "snacks": [
+          {"name": "Green Tea with roasted Makhana", "image_url": "images/greentea_makhana.jpg", "calories": 90},
+          {"name": "Apple/Guava", "image_url": "images/apple_guava.jpg", "calories": 100},
+          {"name": "Cucumber sticks with lemon", "image_url": "images/cucumber_lemon.jpg", "calories": 60},
+          {"name": "Steamed Beetroot Cubes", "image_url": "images/steamed_beetroot.jpg", "calories": 70},
+          {"name": "Watermelon Slices (1 cup)", "image_url": "images/watermelon_slices.jpg", "calories": 50},
+          {"name": "Lemon Infused Herbal Water with Celery Sticks", "image_url": "images/lemon_celery_water.jpg", "calories": 30}
+        ],
+        "dinner": [
+          {"name": "Vegetable Soup with oats", "image_url": "images/veg_soup_oats.jpg", "calories": 150},
+          {"name": "Phulka with Pumpkin Curry", "image_url": "images/phulka_pumpkin.jpg", "calories": 280},
+          {"name": "Khichdi with Moong Dal (no ghee)", "image_url": "images/khichdi_moongdal.jpg", "calories": 290},
+          {"name": "Clear Lentil Broth with Steamed Veggies", "image_url": "images/lentil_broth_steamedveg.jpg", "calories": 200},
+          {"name": "Steamed Zucchini with Quinoa Flakes", "image_url": "images/steamed_zucchini_quinoa.jpg", "calories": 220},
+          {"name": "Cauliflower & Carrot Mash with Jowar Roti", "image_url": "images/cauliflower_carrot_mash.jpg", "calories": 240}
+        ]
+      }
+    },
+    "non_vegetarian": {
+      "low_risk": {
+        "breakfast": [
+          {"name": "Egg white omelette with spinach", "image_url": "images/egg_spinach_omelette.jpg", "calories": 180},
+          {"name": "Vegetable Upma", "image_url": "images/veg_upma.jpg", "calories": 220},
+          {"name": "Oats with boiled eggs", "image_url": "images/oats_boiledeggs.jpg", "calories": 260},
+          {"name": "Scrambled Tofu with Bell Peppers", "image_url": "images/scrambled_tofu_peppers.jpg", "calories": 200},
+          {"name": "Smoked Salmon on Multigrain Toast", "image_url": "images/salmon_multigrain.jpg", "calories": 290},
+          {"name": "Chicken Tikka Skewers with Mint Dip", "image_url": "images/chicken_tikka_skewers.jpg", "calories": 270}
+        ],
+        "lunch": [
+          {"name": "Chapati with Chicken Curry (low oil)", "image_url": "images/chapati_chicken.jpg", "calories": 380},
+          {"name": "Fish Curry with brown rice", "image_url": "images/fish_brownrice.jpg", "calories": 400},
+          {"name": "Grilled Chicken with salad", "image_url": "images/grilledchicken_salad.jpg", "calories": 350},
+          {"name": "Tandoori Fish with Quinoa Pilaf", "image_url": "images/tandoori_fish_quinoa.jpg", "calories": 410},
+          {"name": "Turkey Breast with Roasted Veggies", "image_url": "images/turkey_roastedveg.jpg", "calories": 370},
+          {"name": "Shrimp Stir Fry with Brown Rice Noodles", "image_url": "images/shrimp_stirfry.jpg", "calories": 390}
+        ],
+        "snacks": [
+          {"name": "Boiled Eggs", "image_url": "images/boiled_eggs.jpg", "calories": 140},
+          {"name": "Fruit Chaat", "image_url": "images/fruit_chaat.jpg", "calories": 150},
+          {"name": "Roasted Chana", "image_url": "images/roasted_chana.jpg", "calories": 120},
+          {"name": "Grilled Chicken Strips (50g)", "image_url": "images/grilled_chicken_strips.jpg", "calories": 130},
+          {"name": "Tuna Salad Lettuce Wraps", "image_url": "images/tuna_lettuce_wraps.jpg", "calories": 160},
+          {"name": "Cottage Cheese with Pineapple Chunks", "image_url": "images/cottage_cheese_pineapple.jpg", "calories": 140}
+        ],
+        "dinner": [
+          {"name": "Roti with Fish Curry", "image_url": "images/roti_fishcurry.jpg", "calories": 360},
+          {"name": "Chicken Stew with vegetables", "image_url": "images/chicken_stew.jpg", "calories": 380},
+          {"name": "Grilled Fish with soup", "image_url": "images/grilled_fish_soup.jpg", "calories": 340},
+          {"name": "Lemon Herb Baked Chicken with Steamed Greens", "image_url": "images/lemon_chicken_steamedgreens.jpg", "calories": 350},
+          {"name": "Seafood Medley with Cauliflower Rice", "image_url": "images/seafood_cauliflower_rice.jpg", "calories": 370},
+          {"name": "Turkey Meatballs in Tomato Broth with Zoodles", "image_url": "images/turkey_meatballs_zoodles.jpg", "calories": 330}
+        ]
+      },
+      "moderate_risk": {
+        "breakfast": [
+          {"name": "Egg white bhurji with vegetables", "image_url": "images/eggwhite_bhurji.jpg", "calories": 190},
+          {"name": "Moong Dal Chilla", "image_url": "images/moong_dal_chilla.jpg", "calories": 200},
+          {"name": "Oats with flax seeds and boiled eggs", "image_url": "images/oats_flax_boiledeggs.jpg", "calories": 280},
+          {"name": "Smoked Turkey and Avocado Wrap (low-carb)", "image_url": "images/turkey_avocado_wrap.jpg", "calories": 260},
+          {"name": "Grilled Fish Tacos with Cabbage Slaw", "image_url": "images/fish_tacos.jpg", "calories": 290},
+          {"name": "Poached Eggs on Ragi Toast", "image_url": "images/poached_eggs_ragi.jpg", "calories": 240}
+        ],
+        "lunch": [
+          {"name": "Chapati with Boiled Chicken Curry", "image_url": "images/chapati_boiledchicken.jpg", "calories": 370},
+          {"name": "Fish Curry with steamed rice", "image_url": "images/fish_steamedrice.jpg", "calories": 390},
+          {"name": "Grilled Chicken with vegetables", "image_url": "images/grilledchicken_veg.jpg", "calories": 360},
+          {"name": "Baked Cod with Lemon Herb Quinoa", "image_url": "images/baked_cod_quinoa.jpg", "calories": 380},
+          {"name": "Lean Beef Stir Fry with Bok Choy", "image_url": "images/beef_bokchoy.jpg", "calories": 400},
+          {"name": "Duck Breast Salad with Orange Vinaigrette", "image_url": "images/duck_salad.jpg", "calories": 410}
+        ],
+        "snacks": [
+          {"name": "Buttermilk", "image_url": "images/buttermilk.jpg", "calories": 100},
+          {"name": "Papaya slices", "image_url": "images/papaya.jpg", "calories": 80},
+          {"name": "Sprouts with lemon", "image_url": "images/sprouts_lemon.jpg", "calories": 150},
+          {"name": "Hard Boiled Quail Eggs (4 pieces)", "image_url": "images/quail_eggs.jpg", "calories": 110},
+          {"name": "Grilled Shrimp Skewers (3 pieces)", "image_url": "images/grilled_shrimp.jpg", "calories": 120},
+          {"name": "Low Fat Greek Yogurt with Cucumber", "image_url": "images/greek_yogurt_cucumber.jpg", "calories": 90}
+        ],
+        "dinner": [
+          {"name": "Chicken Soup with vegetables", "image_url": "images/chickensoup_veg.jpg", "calories": 250},
+          {"name": "Phulka with Fish Curry", "image_url": "images/phulka_fishcurry.jpg", "calories": 340},
+          {"name": "Vegetable stew with egg whites", "image_url": "images/vegstew_eggwhite.jpg", "calories": 280},
+          {"name": "Baked Salmon with Asparagus Spears", "image_url": "images/baked_salmon_asparagus.jpg", "calories": 320},
+          {"name": "Turkey Lettuce Cups with Ginger Sauce", "image_url": "images/turkey_lettuce_cups.jpg", "calories": 270},
+          {"name": "Spiced Fish Fillet with Steamed Broccoli", "image_url": "images/spiced_fish_broccoli.jpg", "calories": 300}
+        ]
+      },
+      "high_risk": {
+        "breakfast": [
+          {"name": "Steamed Idli with sambar (no oil)", "image_url": "images/idli_sambar.jpg", "calories": 210},
+          {"name": "Oats porridge with egg whites", "image_url": "images/oats_eggwhite.jpg", "calories": 230},
+          {"name": "Vegetable Daliya", "image_url": "images/veg_daliya.jpg", "calories": 200},
+          {"name": "Poached Egg on Steamed Spinach Bed", "image_url": "images/poached_egg_spinach.jpg", "calories": 180},
+          {"name": "Clear Chicken Broth with Tofu Cubes", "image_url": "images/chickenbroth_tofu.jpg", "calories": 160},
+          {"name": "Boiled Quinoa with Egg Whites and Herbs", "image_url": "images/quinoa_eggwhite_herbs.jpg", "calories": 190}
+        ],
+        "lunch": [
+          {"name": "Chapati with Steamed Fish Curry (no oil)", "image_url": "images/chapati_fishcurry.jpg", "calories": 320},
+          {"name": "Brown Rice with Boiled Chicken & Vegetables", "image_url": "images/brownrice_chickenveg.jpg", "calories": 360},
+          {"name": "Vegetable Khichdi with egg white", "image_url": "images/veg_khichdi_eggwhite.jpg", "calories": 310},
+          {"name": "Grilled Tuna Steak with Steamed Carrots", "image_url": "images/grilled_tuna_carrots.jpg", "calories": 330},
+          {"name": "Skinless Turkey Breast with Cabbage Stir Fry", "image_url": "images/turkey_cabbage.jpg", "calories": 300},
+          {"name": "Steamed Shrimp with Lemon Zest Millet", "image_url": "images/steamed_shrimp_millet.jpg", "calories": 320}
+        ],
+        "snacks": [
+          {"name": "Green Tea with roasted Makhana", "image_url": "images/greentea_makhana.jpg", "calories": 90},
+          {"name": "Apple/Guava", "image_url": "images/apple_guava.jpg", "calories": 100},
+          {"name": "Cucumber sticks", "image_url": "images/cucumber_sticks.jpg", "calories": 60},
+          {"name": "Steamed Edamame with Sea Salt", "image_url": "images/steamed_edamame.jpg", "calories": 80},
+          {"name": "Celery Sticks with Lime Juice", "image_url": "images/celery_lime.jpg", "calories": 40},
+          {"name": "Herbal Infusion with Steamed Radish Slices", "image_url": "images/herbal_radish.jpg", "calories": 35}
+        ],
+        "dinner": [
+          {"name": "Vegetable Soup with grilled fish", "image_url": "images/veg_soup_fish.jpg", "calories": 240},
+          {"name": "Phulka with Boiled Chicken Curry", "image_url": "images/phulka_boiledchicken.jpg", "calories": 310},
+          {"name": "Oats Khichdi with vegetables", "image_url": "images/oats_khichdi_veg.jpg", "calories": 290},
+          {"name": "Clear Fish Broth with Tofu and Bok Choy", "image_url": "images/fishbroth_tofu_bokchoy.jpg", "calories": 220},
+          {"name": "Steamed Chicken Dumplings in Ginger Broth", "image_url": "images/chicken_dumplings_broth.jpg", "calories": 260},
+          {"name": "Baked White Fish with Zucchini Noodles", "image_url": "images/baked_fish_zoodles.jpg", "calories": 250}
+        ]
+      }
+    }
+  }
+}
