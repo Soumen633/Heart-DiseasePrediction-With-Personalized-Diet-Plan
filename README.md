@@ -81,15 +81,13 @@ jupyter notebook
 - Based on the prediction, use **Diet_chart.ipynb** to view the recommended diet plan.
 
 ---
-# 👥 Contributors
+## 👥 Contributors
 
-This project was developed as a group project by:
+This project was developed as a **group project** by:
 
-@your-username
-
-@contributor1
-
-@contributor2
+- [@Soumen633](https://github.com/Soumen633) — *Soumen Nandi*  
+- [@P-Rawani001](https://github.com/P-Rawani001) — *Pankaj Kumar Rawani*  
+- [@AMRITA-2002](https://github.com/AMRITA-2002) — *Amrita Mandal*  
 
 
 
