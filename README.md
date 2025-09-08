@@ -61,8 +61,8 @@ The project also saves trained models inside the `saved_model/` directory for re
 # ⚙️ Installation & Setup
  ##   1️⃣ Clone the repository
    ```bash
-   git clone https://github.com/your-username/heart-disease-diet.git
-   cd heart-disease-diet
+   git clone https://github.com/Soumen633/Heart-DiseasePrediction-With-Personalized-Diet-Plan
+   cd Heart-DiseasePrediction-With-Personalized-Diet-Plan
    ```
  ## 2️⃣ Create a virtual environment (optional but recommended)
  ```bash
