@@ -36,9 +36,17 @@ The project also saves trained models inside the `saved_model/` directory for re
 ```bash
 ├── balanced_heart_disease.csv   # Processed dataset used for training & testing
 ├── Diet_chart.ipynb             # Diet recommendation logic & chart generation
+│   └── Final_diet_plan.json     # Generated final diet plan in JSON format
 ├── Heart.ipynb                  # Core ML model training & evaluation
 ├── Interface.ipynb              # User-facing interface for predictions
 ├── saved_model/                 # Directory where trained models are stored
+│   ├── feature_info_20250906_075310.pkl       # Feature information
+│   ├── heart_disease_model_20250906_075310.pkl # Trained heart disease model
+│   ├── label_encoders_20250906_075310.pkl     # Saved label encoders
+│   ├── model_info_20250906_075310             # Model info file
+│   └── model_metadata_20250906_075310.pkl     # Metadata of trained model
+├── assets/                      # Static resources (images, icons, etc.)
+│   └── banner.jpg               # Project banner image
 └── README.md                    # Project documentation
 ```
 ---
