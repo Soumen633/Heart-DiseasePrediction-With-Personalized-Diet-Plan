@@ -1,7 +1,7 @@
 # 🫀 Heart Disease Prediction with Personalized Diet Plan
 This project presents an advanced Heart Disease Prediction System coupled with a sophisticated Personalized Diet and Lifestyle Recommendation Engine. Leveraging state-of-the-art machine learning models, it accurately assesses an individual's risk of heart disease based on comprehensive clinical and lifestyle parameters. Beyond just prediction, the system intelligently crafts a tailored diet designed to mitigate identified risks and promote cardiovascular wellness.
 
-![Project Banner](./assets/banner.png) <!-- Replace with your actual banner path -->
+![Project Banner](/assets/banner.jpg) <!-- Replace with your actual banner path -->
 
 ---
 
