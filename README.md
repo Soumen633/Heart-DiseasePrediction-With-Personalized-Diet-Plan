@@ -1,4 +1,10 @@
 # 🫀 Heart Disease Prediction with Personalized Diet Plan
+![Status](https://img.shields.io/badge/Status-Active-yellow)
+![Accuracy](https://img.shields.io/badge/Accuracy-95%25-blue)
+![Language](https://img.shields.io/badge/Language-Python-blue)
+![Framework](https://img.shields.io/badge/Framework-TensorFlow-yellow)
+![License](https://img.shields.io/badge/License-MIT-blue)
+![Data](https://img.shields.io/badge/Data-Clinical-yellow)
 This project presents an advanced Heart Disease Prediction System coupled with a sophisticated Personalized Diet and Lifestyle Recommendation Engine. Leveraging state-of-the-art machine learning models, it accurately assesses an individual's risk of heart disease based on comprehensive clinical and lifestyle parameters. Beyond just prediction, the system intelligently crafts a tailored diet designed to mitigate identified risks and promote cardiovascular wellness.
 
 ![Project Banner](/assets/banner.jpg) <!-- Replace with your actual banner path -->
