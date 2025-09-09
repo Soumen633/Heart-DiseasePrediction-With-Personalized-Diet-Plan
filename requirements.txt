@@ -1,0 +1,11 @@
+ipython==9.5.0
+Pillow==11.3.0
+icrawler==0.6.10
+joblib==1.5.2
+matplotlib==3.10.6
+numpy==2.3.2
+pandas==2.3.2
+requests==2.32.5
+scipy==1.16.1
+seaborn==0.13.2
+scikit-learn==1.7.1

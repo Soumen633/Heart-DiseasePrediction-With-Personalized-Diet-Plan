@@ -1,16 +1,7 @@
 # 🫀 Heart Disease Prediction with Personalized Diet Plan
-![Status](https://img.shields.io/badge/Status-Active-yellow)
-![Accuracy](https://img.shields.io/badge/Accuracy-94%25-blue)
-![Language](https://img.shields.io/badge/Language-Python-blue)
-![Framework](https://img.shields.io/badge/Framework-sklearn-yellow)
-![License](https://img.shields.io/badge/License-MIT-blue)
-![Data](https://img.shields.io/badge/Data-Clinical-yellow)
-
 This project presents an advanced Heart Disease Prediction System coupled with a sophisticated Personalized Diet and Lifestyle Recommendation Engine. Leveraging state-of-the-art machine learning models, it accurately assesses an individual's risk of heart disease based on comprehensive clinical and lifestyle parameters. Beyond just prediction, the system intelligently crafts a tailored diet designed to mitigate identified risks and promote cardiovascular wellness.
 
----
-
-![Project Banner](/assets/banner.jpg) <!-- Replace with your actual banner path -->
+![Project Banner](assets/banner.jpg) <!-- Replace with your actual banner path -->
 
 ---
 
@@ -43,28 +34,28 @@ The project also saves trained models inside the `saved_model/` directory for re
 
 ## 📂 Project Structure
 ```bash
-├── balanced_heart_disease.csv   # Processed dataset used for training & testing
-├── Diet_chart.ipynb             # Diet recommendation logic & chart generation
-│   └── Final_diet_plan.json     # Generated final diet plan in JSON format
-├── Heart.ipynb                  # Core ML model training & evaluation
-├── Interface.ipynb              # User-facing interface for predictions
-├── saved_model/                 # Directory where trained models are stored
-│   ├── feature_info_20250906_075310.pkl       # Feature information
+├── balanced_heart_disease.csv                  # Processed dataset used for training & testing
+├── Diet_chart.ipynb                           # Diet recommendation logic & chart generation
+│   └── Final_diet_plan.json                    # Generated final diet plan in JSON format
+├── Heart.ipynb                                  # Core ML model training & evaluation
+├── Interface.ipynb                              # User-facing interface for predictions
+├── saved_model/                                # Directory where trained models are stored
+│   ├── feature_info_20250906_075310.pkl        # Feature information
 │   ├── heart_disease_model_20250906_075310.pkl # Trained heart disease model
 │   ├── label_encoders_20250906_075310.pkl     # Saved label encoders
 │   ├── model_info_20250906_075310             # Model info file
 │   └── model_metadata_20250906_075310.pkl     # Metadata of trained model
-├── assets/                      # Static resources (images, icons, etc.)
-│   └── banner.jpg               # Project banner image
-└── README.md                    # Project documentation
+├── assets/                                    # Static resources (images, icons, etc.)
+│   └── banner.jpg                             # Project banner image
+└── README.md                                  # Project documentation
 ```
 ---
 
 # ⚙️ Installation & Setup
  ##   1️⃣ Clone the repository
    ```bash
-   git clone https://github.com/Soumen633/Heart-DiseasePrediction-With-Personalized-Diet-Plan
-   cd Heart-DiseasePrediction-With-Personalized-Diet-Plan
+   git clone https://github.com/your-username/heart-disease-diet.git
+   cd heart-disease-diet
    ```
  ## 2️⃣ Create a virtual environment (optional but recommended)
  ```bash
@@ -105,6 +96,7 @@ This project was developed as a **group project** by:
 - [@Soumen633](https://github.com/Soumen633) — *Soumen Nandi*  
 - [@P-Rawani001](https://github.com/P-Rawani001) — *Pankaj Kumar Rawani*  
 - [@AMRITA-2002](https://github.com/AMRITA-2002) — *Amrita Mandal*  
+
 
 
 
