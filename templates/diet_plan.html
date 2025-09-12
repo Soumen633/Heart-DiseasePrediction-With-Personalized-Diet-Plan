@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+
+{% block title %}Personalized Diet Plan - CarePulse{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header Section -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-8 text-center">
+            <h2 class="text-white display-6 fw-bold mb-3">
+                <i class="fas fa-utensils me-2"></i>
+                Personalized Diet Plan
+            </h2>
+            <p class="text-white-50">
+                Get a customized meal plan based on your heart disease risk assessment
+            </p>
+        </div>
+    </div>
+    
+    <!-- Risk Summary Card -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="card-title mb-2">
+                                <i class="fas fa-chart-pie me-2"></i>
+                                Your Current Risk Assessment
+                            </h5>
+                            <p class="card-text">
+                                Based on your health data, you have a 
+                                <span class="badge bg-{{ outcome.risk_color }} fs-6">
+                                    {{ outcome.risk_level }}
+                                </span>
+                                with {{ "%.1f"|format(outcome.risk_probability) }}% probability.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="display-6 text-{{ outcome.risk_color }}">
+                                {{ "%.0f"|format(outcome.risk_probability) }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Diet Plan Configuration -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>
+                        Customize Your Diet Plan
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('generate_diet') }}" id="dietForm">
+                        <div class="row">
+                            <!-- Diet Type Selection -->
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-leaf me-2"></i>
+                                    Diet Preference
+                                </label>
+                                <div class="form-check form-check-inline d-block mb-2">
+                                    <input class="form-check-input" type="radio" name="diet_type" 
+                                           id="vegetarian" value="vegetarian" checked>
+                                    <label class="form-check-label" for="vegetarian">
+                                        <i class="fas fa-seedling text-success me-2"></i>
+                                        Vegetarian
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline d-block">
+                                    <input class="form-check-input" type="radio" name="diet_type" 
+                                           id="non_vegetarian" value="non_vegetarian">
+                                    <label class="form-check-label" for="non_vegetarian">
+                                        <i class="fas fa-drumstick-bite text-warning me-2"></i>
+                                        Non-Vegetarian
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Number of Charts -->
+                            <div class="col-md-6 mb-4">
+                                <label for="num_charts" class="form-label fw-bold">
+                                    <i class="fas fa-copy me-2"></i>
+                                    Number of Diet Chart Options
+                                </label>
+                                <select class="form-select" id="num_charts" name="num_charts">
+                                    <option value="1">1 Chart</option>
+                                    <option value="2">2 Charts</option>
+                                    <option value="3" selected>3 Charts (Recommended)</option>
+                                </select>
+                                <div class="form-text">
+                                    Multiple charts give you variety in your meal planning
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Risk-Based Recommendations -->
+                        <div class="alert alert-{{ outcome.risk_color }} alert-dismissible fade show mb-4" role="alert">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Dietary Recommendations for {{ outcome.risk_level }}
+                            </h6>
+                            {% if outcome.risk_level == 'Low Risk' %}
+                            <p class="mb-0">
+                                Focus on <strong>maintenance and prevention</strong>. Your diet plan will include 
+                                balanced nutrition with heart-healthy foods to maintain your current good health status.
+                            </p>
+                            {% elif outcome.risk_level == 'Moderate Risk' %}
+                            <p class="mb-0">
+                                Your diet plan will emphasize <strong>heart-protective nutrients</strong> and 
+                                controlled portions to help reduce your risk factors and improve cardiovascular health.
+                            </p>
+                            {% else %}
+                            <p class="mb-0">
+                                A <strong>strict therapeutic diet</strong> is recommended. The plan will focus on 
+                                foods that actively support heart health and help manage risk factors.
+                                <br><small><em>Please consult your healthcare provider before starting this diet plan.</em></small>
+                            </p>
+                            {% endif %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        
+                        <!-- Diet Plan Features -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-star me-2 text-warning"></i>
+                                    What's Included in Your Diet Plan
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-sun text-warning me-3 fa-lg"></i>
+                                            <div>
+                                                <strong>Breakfast Options</strong>
+                                                <br><small class="text-muted">2 nutritious breakfast items</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-sun text-primary me-3 fa-lg"></i>
+                                            <div>
+                                                <strong>Lunch Selections</strong>
+                                                <br><small class="text-muted">3 balanced lunch options</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-apple-alt text-success me-3 fa-lg"></i>
+                                            <div>
+                                                <strong>Healthy Snacks</strong>
+                                                <br><small class="text-muted">2 heart-healthy snack options</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-moon text-info me-3 fa-lg"></i>
+                                            <div>
+                                                <strong>Dinner Choices</strong>
+                                                <br><small class="text-muted">3 nutritious dinner items</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Image Crawling Notice -->
+                        <div class="alert alert-info mb-4" id="imageCrawlingNotice" style="display: none;">
+                            <div class="d-flex align-items-center">
+                                <div class="spinner-border spinner-border-sm text-info me-3" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div>
+                                    <strong>Preparing food images...</strong>
+                                    <br><small>We're downloading high-quality images for your food items from Bing. This will enhance your diet plan experience!</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5" id="generateDietBtn">
+                                <i class="fas fa-magic me-2"></i>
+                                Generate My Diet Plan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Information -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-download fa-3x text-primary mb-3"></i>
+                            <h6 class="card-title">PDF Export</h6>
+                            <p class="card-text">
+                                Download your complete diet plan as a professional PDF report for easy sharing and reference.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-images fa-3x text-success mb-3"></i>
+                            <h6 class="card-title">Visual Food Guide</h6>
+                            <p class="card-text">
+                                Each food item comes with high-quality images from Bing to help you identify and prepare meals easily.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Disclaimer -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <div class="alert alert-info">
+                <h6 class="alert-heading">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Important Disclaimer
+                </h6>
+                <p class="mb-0">
+                    This diet plan is generated based on general nutritional guidelines and your risk assessment. 
+                    It is not a substitute for professional medical or nutritional advice. Please consult with 
+                    your healthcare provider or a registered dietitian before making significant dietary changes, 
+                    especially if you have existing health conditions or are taking medications.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('dietForm');
+    const submitBtn = document.getElementById('generateDietBtn');
+    const imageCrawlingNotice = document.getElementById('imageCrawlingNotice');
+    
+    // Add form validation and enhancement
+    form.addEventListener('submit', function(e) {
+        // Show image crawling notice immediately
+        imageCrawlingNotice.style.display = 'block';
+        imageCrawlingNotice.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Add loading state to button
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating & Downloading Images...';
+        submitBtn.disabled = true;
+        
+        // Show enhanced processing message
+        const processingAlert = document.createElement('div');
+        processingAlert.className = 'alert alert-success mt-3';
+        processingAlert.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-cog fa-spin me-2"></i>
+                <div>
+                    <strong>Creating your personalized diet plan...</strong>
+                    <br><small>• Generating meal combinations based on your risk level</small>
+                    <br><small>• Downloading food images from Bing for visual reference</small>
+                    <br><small>• Calculating nutritional information</small>
+                </div>
+            </div>
+        `;
+        form.appendChild(processingAlert);
+        
+        // Notify backend to start image crawling immediately
+        // This happens automatically when the form is submitted to /generate-diet
+        console.log('Diet generation started - images will begin downloading immediately');
+    });
+    
+    // Add visual feedback for radio button changes
+    const radioButtons = form.querySelectorAll('input[type="radio"]');
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Add visual feedback when selection changes
+            const label = form.querySelector(`label[for="${this.id}"]`);
+            if (label) {
+                label.style.transform = 'scale(1.05)';
+                label.style.transition = 'transform 0.2s ease';
+                setTimeout(() => {
+                    label.style.transform = 'scale(1)';
+                }, 200);
+            }
+            
+            // Update image crawling notice based on diet type
+            if (this.name === 'diet_type') {
+                const dietType = this.value;
+                const noticeText = imageCrawlingNotice.querySelector('small');
+                if (noticeText) {
+                    noticeText.textContent = `We're downloading high-quality ${dietType} food images from Bing. This will enhance your diet plan experience!`;
+                }
+            }
+        });
+    });
+    
+    // Add number of charts change handler
+    const numChartsSelect = document.getElementById('num_charts');
+    numChartsSelect.addEventListener('change', function() {
+        const numCharts = parseInt(this.value);
+        const processingMessage = document.querySelector('.alert-success small');
+        if (processingMessage) {
+            processingMessage.textContent = `Preparing to download images for ${numCharts} different diet chart${numCharts > 1 ? 's' : ''}`;
+        }
+    });
+    
+    // Add smooth transitions to cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.5s ease';
+        
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Add hover effects to feature cards
+    const featureCards = document.querySelectorAll('.card h-100');
+    featureCards.forEach(card => {
+        card.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Preload notification about Bing images
+    const bingImageInfo = document.createElement('div');
+    bingImageInfo.className = 'alert alert-light mt-2';
+    bingImageInfo.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fab fa-microsoft text-primary me-2"></i>
+            <small><strong>Powered by Bing Images:</strong> High-quality food images will be automatically downloaded to enhance your diet plan visualization.</small>
+        </div>
+    `;
+    
+    // Insert after the diet features section
+    const featuresSection = document.querySelector('.row.mb-4');
+    if (featuresSection) {
+        featuresSection.appendChild(bingImageInfo);
+    }
+});
+</script>
+{% endblock %}

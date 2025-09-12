@@ -1,0 +1,707 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction Results - CarePulse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .risk-card {
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;
+    }
+    
+  .health-metric-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.4s ease;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid transparent;
+    min-height: 180px;
+}
+
+.health-metric-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    border-color: #007bff;
+    background: rgba(255, 255, 255, 1);
+}
+
+.health-value-tooltip {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 15px;
+    border-radius: 0 0 15px 15px;
+    transform: translateY(100%);
+    opacity: 0;
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.health-metric-card:hover .health-value-tooltip {
+    transform: translateY(0);
+    opacity: 1;
+    transition-delay: 0.1s;
+}
+
+.health-metric-card.mobile-active .health-value-tooltip {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.metric-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    transition: color 0.3s ease;
+}
+
+.health-metric-card:hover .metric-title {
+    color: #007bff;
+}
+
+.tooltip-value {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.tooltip-description {
+    font-size: 0.95rem;
+    opacity: 0.95;
+    line-height: 1.4;
+}
+
+/* Focus states for keyboard navigation */
+.health-metric-card:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.health-metric-card:focus .health-value-tooltip {
+    transform: translateY(0);
+    opacity: 1;
+}
+    
+    .metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .health-metric-card:hover .metric-icon {
+        transform: scale(1.1);
+    }
+    
+    .metric-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+    
+    .metric-subtitle {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 0;
+    }
+    
+    .tooltip-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .tooltip-description {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .risk-indicator {
+        height: 8px;
+        border-radius: 4px;
+        margin: 1rem 0;
+        background: linear-gradient(90deg, #28a745 0%, #ffc107 50%, #dc3545 100%);
+        position: relative;
+    }
+    
+    .risk-pointer {
+        position: absolute;
+        top: -8px;
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 16px solid #2c3e50;
+        transition: left 0.5s ease;
+    }
+    
+    .recommendations-section {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .action-buttons {
+        margin-top: 2rem;
+        text-align: center;
+    }
+    
+    .btn-custom {
+        border-radius: 50px;
+        padding: 12px 30px;
+        font-weight: 600;
+        margin: 0 10px;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-custom::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-custom:hover::before {
+        left: 100%;
+    }
+    
+    .btn-diet {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+    
+    .btn-diet:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        color: white;
+    }
+    
+    .btn-new {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: white;
+    }
+    
+    .btn-new:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        color: white;
+    }
+    
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .slide-in {
+        animation: slideIn 0.8s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="gradient-bg">
+    <div class="container">
+        <!-- Risk Assessment Card -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="risk-card p-4 slide-in">
+                    <div class="text-center mb-4">
+                        <h2 class="mb-3">
+                            <i class="fas fa-heartbeat text-{{ prediction.risk_color }} me-2"></i>
+                            Heart Disease Risk Assessment
+                        </h2>
+                        
+                        <!-- Risk Level Display -->
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <div class="risk-probability {{ 'pulse-animation' if prediction.risk_color == 'danger' else '' }}">
+                                    <h1 class="display-3 text-{{ prediction.risk_color }} fw-bold mb-0">
+                                        {{ prediction.risk_probability }}%
+                                    </h1>
+                                    <h4 class="text-{{ prediction.risk_color }}">{{ prediction.risk_level }}</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="risk-indicator">
+                                    <div class="risk-pointer" style="left: {{ prediction.risk_probability }}%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between text-sm">
+                                    <span class="text-success">Low Risk</span>
+                                    <span class="text-warning">Moderate Risk</span>
+                                    <span class="text-danger">High Risk</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <span class="badge bg-info px-3 py-2">
+                                Confidence Level: {{ prediction.confidence_level }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Data Summary -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="risk-card p-4">
+                    <div class="mb-4">
+                        <h4 class="mb-3">
+                            <i class="fas fa-clipboard-list me-2"></i>
+                            Your Health Data Summary
+                        </h4>
+                        <p class="text-muted">Hover over each metric to see your entered values</p>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Age -->
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="health-metric-card" tabindex="0">
+                                <div class="metric-icon text-primary">
+                                    <i class="fas fa-birthday-cake"></i>
+                                </div>
+                                <div class="metric-title">{{ user_data.age }}</div>
+                                <div class="metric-subtitle">Age (years)</div>
+                                <div class="health-value-tooltip">
+                                    <div class="tooltip-value">{{ user_data.age }} years old</div>
+                                    <div class="tooltip-description">Your current age affects cardiovascular risk factors</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Gender -->
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="health-metric-card" tabindex="0">
+                                <div class="metric-icon text-info">
+                                    <i class="fas fa-venus-mars"></i>
+                                </div>
+                                <div class="metric-title">{{ user_data.gender }}</div>
+                                <div class="metric-subtitle">Sex</div>
+                                <div class="health-value-tooltip">
+                                    <div class="tooltip-value">{{ user_data.gender }}</div>
+                                    <div class="tooltip-description">Biological sex influences heart disease risk patterns</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Blood Pressure -->
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="health-metric-card" tabindex="0">
+                                <div class="metric-icon text-warning">
+                                    <i class="fas fa-thermometer-half"></i>
+                                </div>
+                                <div class="metric-title">Blood Pressure</div>
+                                <div class="metric-subtitle">mmHg</div>
+                                <div class="health-value-tooltip">
+                                    <div class="tooltip-value">{{ user_data.blood_pressure }} mmHg</div>
+                                    <div class="tooltip-description">
+                                        {% if user_data.blood_pressure < 90 %}
+                                            Low blood pressure
+                                        {% elif user_data.blood_pressure <= 140 %}
+                                            Normal blood pressure range
+                                        {% else %}
+                                            High blood pressure - consult your doctor
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cholesterol -->
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="health-metric-card" tabindex="0">
+                                <div class="metric-icon text-success">
+                                    <i class="fas fa-vial"></i>
+                                </div>
+                                <div class="metric-title">Cholesterol</div>
+                                <div class="metric-subtitle">mg/dL</div>
+                                <div class="health-value-tooltip">
+                                    <div class="tooltip-value">{{ user_data.cholesterol }} mg/dL</div>
+                                    <div class="tooltip-description">
+                                        {% if user_data.cholesterol < 200 %}
+                                            Desirable cholesterol level
+                                        {% elif user_data.cholesterol <= 239 %}
+                                            Borderline high cholesterol
+                                        {% else %}
+                                            High cholesterol - dietary changes recommended
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Exercise -->
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="health-metric-card" tabindex="0">
+                                <div class="metric-icon text-primary">
+                                    <i class="fas fa-running"></i>
+                                </div>
+                                <div class="metric-title">Exercise</div>
+                                <div class="metric-subtitle">Activity Level</div>
+                                <div class="health-value-tooltip">
+                                    <div class="tooltip-value">{{ user_data.exercise }}</div>
+                                    <div class="tooltip-description">Your weekly exercise frequency affects heart health significantly</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- BMI -->
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="health-metric-card" tabindex="0">
+                                <div class="metric-icon text-info">
+                                    <i class="fas fa-weight"></i>
+                                </div>
+                                <div class="metric-title">BMI</div>
+                                <div class="metric-subtitle">Body Mass Index</div>
+                                <div class="health-value-tooltip">
+                                    <div class="tooltip-value">{{ user_data.bmi }}</div>
+                                    <div class="tooltip-description">
+                                        {% if user_data.bmi < 18.5 %}
+                                            Underweight
+                                        {% elif user_data.bmi <= 24.9 %}
+                                            Normal weight
+                                        {% elif user_data.bmi <= 29.9 %}
+                                            Overweight
+                                        {% else %}
+                                            Obese - weight management recommended
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Smoking -->
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="health-metric-card" tabindex="0">
+                                <div class="metric-icon {{ 'text-danger' if user_data.smoking == 'Yes' else 'text-success' }}">
+                                    <i class="fas {{ 'fa-smoking' if user_data.smoking == 'Yes' else 'fa-smoking-ban' }}"></i>
+                                </div>
+                                <div class="metric-title">Smoking</div>
+                                <div class="metric-subtitle">Status</div>
+                                <div class="health-value-tooltip">
+                                    <div class="tooltip-value">{{ user_data.smoking }}</div>
+                                    <div class="tooltip-description">
+                                        {% if user_data.smoking == 'Yes' %}
+                                            Smoking significantly increases heart disease risk
+                                        {% else %}
+                                            Great! Non-smoking reduces cardiovascular risk
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stress Level -->
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="health-metric-card" tabindex="0">
+                                <div class="metric-icon text-warning">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <div class="metric-title">Stress Level</div>
+                                <div class="metric-subtitle">1-10 Scale</div>
+                                <div class="health-value-tooltip">
+                                    <div class="tooltip-value">{{ user_data.stress_level }}/10</div>
+                                    <div class="tooltip-description">
+                                        {% if user_data.stress_level <= 3 %}
+                                            Low stress - good for heart health
+                                        {% elif user_data.stress_level <= 6 %}
+                                            Moderate stress - manageable level
+                                        {% else %}
+                                            High stress - consider stress management techniques
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personalized Recommendations -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="recommendations-section slide-in">
+                    <div class="text-center mb-4">
+                        <h4>
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Personalized Recommendations
+                        </h4>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-warning mb-3">
+                                <i class="fas fa-heart me-2"></i>Health Guidelines
+                            </h5>
+                            <ul class="list-unstyled">
+                                {% if prediction.risk_category == 'high_risk' %}
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Consult a cardiologist immediately</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Monitor blood pressure daily</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Follow strict low-sodium diet</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Take prescribed medications regularly</li>
+                                {% elif prediction.risk_category == 'moderate_risk' %}
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Increase physical activity gradually</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Schedule regular checkups</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Follow heart-healthy diet strictly</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Monitor cholesterol levels</li>
+                                {% else %}
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Maintain current healthy habits</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Continue regular exercise routine</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Annual health screenings</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Maintain balanced diet</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="text-info mb-3">
+                                <i class="fas fa-utensils me-2"></i>Dietary Focus
+                            </h5>
+                            <ul class="list-unstyled">
+                                {% if prediction.risk_category == 'high_risk' %}
+                                    <li class="mb-2"><i class="fas fa-ban text-danger me-2"></i>Severely limit sodium intake</li>
+                                    <li class="mb-2"><i class="fas fa-leaf text-success me-2"></i>Increase omega-3 rich foods</li>
+                                    <li class="mb-2"><i class="fas fa-apple-alt text-success me-2"></i>Focus on whole grains and vegetables</li>
+                                    <li class="mb-2"><i class="fas fa-tint text-info me-2"></i>Stay well hydrated</li>
+                                {% elif prediction.risk_category == 'moderate_risk' %}
+                                    <li class="mb-2"><i class="fas fa-balance-scale text-warning me-2"></i>Reduce sodium intake</li>
+                                    <li class="mb-2"><i class="fas fa-fish text-success me-2"></i>Include fish twice weekly</li>
+                                    <li class="mb-2"><i class="fas fa-seedling text-success me-2"></i>Control portion sizes</li>
+                                    <li class="mb-2"><i class="fas fa-wine-glass text-warning me-2"></i>Limit alcohol consumption</li>
+                                {% else %}
+                                    <li class="mb-2"><i class="fas fa-heart text-success me-2"></i>Maintain balanced nutrition</li>
+                                    <li class="mb-2"><i class="fas fa-carrot text-success me-2"></i>Include plenty of fruits and vegetables</li>
+                                    <li class="mb-2"><i class="fas fa-dumbbell text-success me-2"></i>Match calorie intake with activity</li>
+                                    <li class="mb-2"><i class="fas fa-glass-water text-info me-2"></i>Stay properly hydrated</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <a href="{{ url_for('diet_plan_page') }}" class="btn btn-custom btn-diet">
+                            <i class="fas fa-utensils me-2"></i>
+                            Get Personalized Diet Plan
+                        </a>
+                        <a href="{{ url_for('new_prediction') }}" class="btn btn-custom btn-new">
+                            <i class="fas fa-redo me-2"></i>
+                            Start New Prediction
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Medical Disclaimer -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-lg-10">
+                <div class="alert alert-info" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Important Medical Disclaimer
+                    </h6>
+                    <p class="mb-0">
+                        This prediction is for informational purposes only and should not replace professional medical advice. 
+                        Always consult with a qualified healthcare provider for proper diagnosis and treatment.
+                        <strong>If you have chest pain or other cardiac symptoms, seek immediate medical attention.</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate risk pointer
+    const riskPointer = document.querySelector('.risk-pointer');
+    if (riskPointer) {
+        const riskValue = {{ prediction.risk_probability }};
+        setTimeout(() => {
+            riskPointer.style.left = riskValue + '%';
+        }, 500);
+    }
+    
+    // Add staggered animation to health metric cards
+    const metricCards = document.querySelectorAll('.health-metric-card');
+    metricCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('slide-in');
+    });
+    
+    // Enhanced tooltip interactions
+   // Enhanced tooltip interactions
+metricCards.forEach(card => {
+    let tooltipTimeout;
+    
+    // Mouse events for desktop
+    card.addEventListener('mouseenter', function() {
+        clearTimeout(tooltipTimeout);
+        this.style.zIndex = '20';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        tooltipTimeout = setTimeout(() => {
+            this.style.zIndex = '1';
+        }, 300);
+    });
+    
+    // Touch events for mobile
+    card.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        
+        // Remove active state from all cards
+        metricCards.forEach(otherCard => {
+            if (otherCard !== card) {
+                otherCard.classList.remove('mobile-active');
+                otherCard.style.zIndex = '1';
+            }
+        });
+        
+        // Toggle current card
+        const isActive = this.classList.contains('mobile-active');
+        if (isActive) {
+            this.classList.remove('mobile-active');
+            this.style.zIndex = '1';
+        } else {
+            this.classList.add('mobile-active');
+            this.style.zIndex = '20';
+        }
+    });
+    
+    // Keyboard support
+    card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.click();
+        }
+    });
+    
+    // Focus events
+    card.addEventListener('focus', function() {
+        this.style.zIndex = '20';
+    });
+    
+    card.addEventListener('blur', function() {
+        setTimeout(() => {
+            this.style.zIndex = '1';
+        }, 300);
+    });
+});
+
+// Close tooltips when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.health-metric-card')) {
+        metricCards.forEach(card => {
+            card.classList.remove('mobile-active');
+            card.style.zIndex = '1';
+        });
+    }
+});
+    
+    // Print functionality
+    window.printResults = function() {
+        window.print();
+    };
+    
+    // Share functionality (if Web Share API is supported)
+    if (navigator.share) {
+        window.shareResults = function() {
+            navigator.share({
+                title: 'Heart Disease Risk Assessment Results',
+                text: 'My heart disease risk assessment shows: {{ prediction.risk_level }}',
+                url: window.location.href
+            }).catch(console.error);
+        };
+    }
+});
+</script>
+
+<style>
+@media (max-width: 768px) {
+    .health-metric-card.mobile-tooltip-active .health-value-tooltip {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    
+    .health-metric-card .health-value-tooltip {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        transform: translateY(-10px);
+        opacity: 0;
+        margin-top: 15px;
+        border-radius: 10px;
+    }
+}
+
+@media print {
+    .btn, .action-buttons {
+        display: none !important;
+    }
+    
+    .gradient-bg {
+        background: white !important;
+    }
+    
+    .health-value-tooltip {
+        position: relative !important;
+        transform: translateY(0) !important;
+        opacity: 1 !important;
+        margin-top: 10px;
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock %}

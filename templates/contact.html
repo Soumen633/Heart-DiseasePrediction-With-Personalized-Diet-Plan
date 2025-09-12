@@ -1,0 +1,779 @@
+{% extends "base.html" %}
+
+{% block title %}Contact & Support - CarePulse{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8 text-center">
+            <h2 class="text-white display-5 fw-bold mb-3">
+                Contact & Support
+            </h2>
+            <p class="text-white-50 fs-5">
+                We're here to help you on your journey to better heart health
+            </p>
+        </div>
+    </div>
+    
+    <!-- Contact Options -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body p-4">
+                            <i class="fas fa-question-circle fa-3x text-primary mb-3"></i>
+                            <h5>General Support</h5>
+                            <p>Have questions about using CarePulse or need help with your predictions?</p>
+                            <a href="mailto:carepulse.in@gmail.com" class="btn btn-primary">
+                                <i class="fas fa-envelope me-2"></i>carepulse.in@gmail.com
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body p-4">
+                            <i class="fas fa-user-md fa-3x text-success mb-3"></i>
+                            <h5>Medical Inquiries</h5>
+                            <p>Questions about your results or need clarification on recommendations?</p>
+                            <a href="mailto:webmaster-pmjay@nha.gov.in" class="btn btn-success">
+                                <i class="fas fa-envelope me-2"></i>webmaster-pmjay@nha.gov.in
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body p-4">
+                            <i class="fas fa-bug fa-3x text-warning mb-3"></i>
+                            <h5>Technical Issues</h5>
+                            <p>Experiencing bugs or technical problems with the application?</p>
+                            <a href="mailto:carepulse.in@gmail.com" class="btn btn-warning">
+                                <i class="fas fa-envelope me-2"></i>carepulse.in@gmail.com
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- FAQ Section -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        Frequently Asked Questions
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <!-- FAQ 1 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq1">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
+                                    How accurate is the heart disease prediction?
+                                </button>
+                            </h2>
+                            <div id="collapse1" class="accordion-collapse collapse show" 
+                                 aria-labelledby="faq1" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Our AI model achieves 98% accuracy on validated datasets. However, this is a screening tool 
+                                    and should not replace professional medical diagnosis. The prediction is based on statistical 
+                                    analysis of your health parameters compared to clinical data.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 2 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
+                                    Is my health data safe and private?
+                                </button>
+                            </h2>
+                            <div id="collapse2" class="accordion-collapse collapse" 
+                                 aria-labelledby="faq2" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Absolutely. We process your data anonymously and never store personal health information 
+                                    permanently. All data transmission is encrypted, and we follow strict privacy protocols. 
+                                    Your information is used only for generating your personalized results.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 3 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq3">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+                                    Can I share my results with my doctor?
+                                </button>
+                            </h2>
+                            <div id="collapse3" class="accordion-collapse collapse" 
+                                 aria-labelledby="faq3" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes! We provide comprehensive PDF reports that include your risk assessment, input parameters, 
+                                    and personalized diet recommendations. These reports are designed to be shared with healthcare 
+                                    professionals to support your medical consultations.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 4 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq4">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
+                                    How often should I use this tool?
+                                </button>
+                            </h2>
+                            <div id="collapse4" class="accordion-collapse collapse" 
+                                 aria-labelledby="faq4" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    You can use CarePulse whenever your health parameters change significantly or as recommended 
+                                    by your healthcare provider. For monitoring purposes, quarterly assessments can help track 
+                                    changes in your cardiovascular risk profile.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 5 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq5">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse5" aria-expanded="false" aria-controls="collapse5">
+                                    Are the diet plans suitable for everyone?
+                                </button>
+                            </h2>
+                            <div id="collapse5" class="accordion-collapse collapse" 
+                                 aria-labelledby="faq5" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Our diet plans are based on general nutritional guidelines and heart-healthy principles. 
+                                    However, individual dietary needs vary based on allergies, medical conditions, and personal 
+                                    preferences. Always consult with a registered dietitian or healthcare provider before 
+                                    making significant dietary changes.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 6 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq6">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse6" aria-expanded="false" aria-controls="collapse6">
+                                    What should I do if I get a high-risk result?
+                                </button>
+                            </h2>
+                            <div id="collapse6" class="accordion-collapse collapse" 
+                                 aria-labelledby="faq6" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    If you receive a high-risk assessment, please consult with a healthcare professional 
+                                    immediately. While our AI provides valuable insights, only a qualified medical professional 
+                                    can provide proper diagnosis and treatment plans. Use our results as a starting point 
+                                    for discussion with your doctor.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contact Form -->
+    <!-- <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-envelope me-2"></i>
+                        Send Us a Message
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="contactForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <select class="form-select" id="subject" name="subject" required>
+                                <option value="">Select a topic</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="technical">Technical Support</option>
+                                <option value="medical">Medical Question</option>
+                                <option value="feedback">Feedback & Suggestions</option>
+                                <option value="partnership">Partnership Inquiry</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" 
+                                      placeholder="Please describe your question or concern in detail..." required></textarea>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="privacy" required>
+                            <label class="form-check-label" for="privacy">
+                                I agree to the privacy policy and terms of service
+                            </label>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+     -->
+    <!-- Additional Resources -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-book fa-2x text-info mb-3"></i>
+                            <h6>Documentation</h6>
+                            <p class="small">
+                                Comprehensive guides on how to use CarePulse effectively and interpret your results.
+                            </p>
+                            <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#docsModal">
+                                View Docs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fab fa-github fa-2x text-dark mb-3"></i>
+                            <h6>Open Source</h6>
+                            <p class="small">
+                                CarePulse is open source. Contribute to the project or report issues on GitHub.
+                            </p>
+                            <a href="https://github.com/Soumen633/Heart-DiseasePrediction-With-Personalized-Diet-Plan" 
+                               class="btn btn-outline-dark btn-sm" target="_blank">
+                                View on GitHub
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-heart fa-2x text-danger mb-3"></i>
+                            <h6>Community</h6>
+                            <p class="small">
+                                Join our community of health-conscious individuals sharing their wellness journey.
+                            </p>
+                            <a href="https://github.com/Soumen633/Heart-DiseasePrediction-With-Personalized-Diet-Plan" class="btn btn-outline-danger btn-sm">Join Community</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Documentation Modal -->
+<div class="modal fade" id="docsModal" tabindex="-1" aria-labelledby="docsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="docsModalLabel">
+                    <i class="fas fa-book me-2"></i>CarePulse User Guide
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="documentation-content">
+                    <!-- Getting Started -->
+                    <section class="mb-4">
+                        <h4 class="text-primary border-bottom pb-2">
+                            <i class="fas fa-play-circle me-2"></i>Getting Started
+                        </h4>
+                        <p class="lead">Welcome to CarePulse! This guide will help you navigate through our heart disease prediction system and get the most accurate results.</p>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Important:</strong> CarePulse is a screening tool and should not replace professional medical advice. Always consult with healthcare professionals for medical decisions.
+                        </div>
+                    </section>
+
+                    <!-- Step by Step Guide -->
+                    <section class="mb-4">
+                        <h4 class="text-primary border-bottom pb-2">
+                            <i class="fas fa-list-ol me-2"></i>Step-by-Step Process
+                        </h4>
+                        
+                        <div class="step-guide">
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <span class="badge bg-primary rounded-circle p-2 fs-6">1</span>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold">Navigate to Prediction</h6>
+                                    <p class="mb-0">Click on the "Get Prediction" button from the homepage or use the navigation menu to access the prediction form.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <span class="badge bg-primary rounded-circle p-2 fs-6">2</span>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold">Fill Health Parameters</h6>
+                                    <p class="mb-0">Carefully enter your health data including age, gender, chest pain type, blood pressure, cholesterol levels, and other medical parameters. Accuracy is crucial for reliable results.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <span class="badge bg-primary rounded-circle p-2 fs-6">3</span>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold">Review Your Input</h6>
+                                    <p class="mb-0">Double-check all entered values before submitting. Use the tooltips and help text provided for each field to ensure accuracy.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <span class="badge bg-primary rounded-circle p-2 fs-6">4</span>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold">Get Your Results</h6>
+                                    <p class="mb-0">Submit the form to receive your personalized heart disease risk assessment along with detailed explanations and recommendations.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <span class="badge bg-primary rounded-circle p-2 fs-6">5</span>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold">Access Diet Plan</h6>
+                                    <p class="mb-0">Based on your risk level, receive a personalized diet plan with specific food recommendations, portion sizes, and nutritional guidelines.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 me-3">
+                                    <span class="badge bg-primary rounded-circle p-2 fs-6">6</span>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold">Download Report</h6>
+                                    <p class="mb-0">Generate and download a comprehensive PDF report to share with your healthcare provider or for your records.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Understanding Parameters -->
+                    <section class="mb-4">
+                        <h4 class="text-primary border-bottom pb-2">
+                            <i class="fas fa-chart-line me-2"></i>Understanding Health Parameters
+                        </h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-success">Basic Information</h6>
+                                <ul class="list-unstyled ms-3">
+                                    <li><i class="fas fa-check-circle text-success me-2"></i><strong>Age:</strong> Your current age in years</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i><strong>Gender:</strong> Male or Female</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i><strong>Chest Pain Type:</strong> Type of chest discomfort experienced</li>
+                                </ul>
+                                
+                                <h6 class="fw-bold text-warning mt-3">Vital Signs</h6>
+                                <ul class="list-unstyled ms-3">
+                                    <li><i class="fas fa-check-circle text-warning me-2"></i><strong>Resting BP:</strong> Blood pressure at rest (mmHg)</li>
+                                    <li><i class="fas fa-check-circle text-warning me-2"></i><strong>Cholesterol:</strong> Serum cholesterol level (mg/dl)</li>
+                                    <li><i class="fas fa-check-circle text-warning me-2"></i><strong>Max Heart Rate:</strong> Maximum heart rate achieved</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-info">Medical History</h6>
+                                <ul class="list-unstyled ms-3">
+                                    <li><i class="fas fa-check-circle text-info me-2"></i><strong>Fasting Blood Sugar:</strong> >120 mg/dl (Yes/No)</li>
+                                    <li><i class="fas fa-check-circle text-info me-2"></i><strong>Resting ECG:</strong> Electrocardiogram results</li>
+                                    <li><i class="fas fa-check-circle text-info me-2"></i><strong>Exercise Angina:</strong> Chest pain during exercise</li>
+                                </ul>
+                                
+                                <h6 class="fw-bold text-danger mt-3">Advanced Parameters</h6>
+                                <ul class="list-unstyled ms-3">
+                                    <li><i class="fas fa-check-circle text-danger me-2"></i><strong>ST Depression:</strong> Exercise-induced ST depression</li>
+                                    <li><i class="fas fa-check-circle text-danger me-2"></i><strong>ST Slope:</strong> Peak exercise ST segment slope</li>
+                                    <li><i class="fas fa-check-circle text-danger me-2"></i><strong>Vessels:</strong> Number of major vessels colored</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Interpreting Results -->
+                    <section class="mb-4">
+                        <h4 class="text-primary border-bottom pb-2">
+                            <i class="fas fa-chart-pie me-2"></i>Interpreting Your Results
+                        </h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0"><i class="fas fa-heart me-2"></i>Low Risk</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small mb-0">Your health parameters suggest a lower likelihood of heart disease. Continue maintaining a healthy lifestyle with regular checkups.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card border-danger">
+                                    <div class="card-header bg-danger text-white">
+                                        <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>High Risk</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small mb-0">Your parameters indicate higher risk. Please consult with a healthcare professional immediately for proper evaluation and treatment.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Diet Plan Features -->
+                    <section class="mb-4">
+                        <h4 class="text-primary border-bottom pb-2">
+                            <i class="fas fa-utensils me-2"></i>Personalized Diet Plans
+                        </h4>
+                        
+                        <p>Our AI generates customized diet recommendations based on your risk assessment:</p>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-leaf fa-2x text-success mb-2"></i>
+                                    <h6>Heart-Healthy Foods</h6>
+                                    <p class="small">Foods that support cardiovascular health</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-balance-scale fa-2x text-info mb-2"></i>
+                                    <h6>Portion Control</h6>
+                                    <p class="small">Appropriate serving sizes for optimal health</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                                    <h6>Meal Timing</h6>
+                                    <p class="small">Optimal eating schedules and frequency</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tips for Best Results -->
+                    <section class="mb-4">
+                        <h4 class="text-primary border-bottom pb-2">
+                            <i class="fas fa-lightbulb me-2"></i>Tips for Best Results
+                        </h4>
+                        
+                        <div class="alert alert-success">
+                            <h6 class="alert-heading"><i class="fas fa-check-circle me-2"></i>Do's</h6>
+                            <ul class="mb-0">
+                                <li>Use recent medical test results for accuracy</li>
+                                <li>Consult with healthcare providers about your parameters</li>
+                                <li>Keep a record of your results for tracking progress</li>
+                                <li>Follow up with regular health checkups</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <h6 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Don'ts</h6>
+                            <ul class="mb-0">
+                                <li>Don't guess or estimate medical values</li>
+                                <li>Don't ignore high-risk results</li>
+                                <li>Don't use results as a substitute for medical advice</li>
+                                <li>Don't make drastic lifestyle changes without professional guidance</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- Contact Information -->
+                    <section>
+                        <h4 class="text-primary border-bottom pb-2">
+                            <i class="fas fa-question-circle me-2"></i>Need Help?
+                        </h4>
+                        
+                        <p>If you encounter any issues or have questions about using CarePulse:</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                                        <h6>Email Support</h6>
+                                        <a href="mailto:carepulse.in@gmail.com" class="btn btn-outline-primary btn-sm">
+                                            Contact Us
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <i class="fab fa-github fa-2x text-dark mb-2"></i>
+                                        <h6>Report Issues</h6>
+                                        <a href="https://github.com/Soumen633/Heart-DiseasePrediction-With-Personalized-Diet-Plan" 
+                                           class="btn btn-outline-dark btn-sm" target="_blank">
+                                            GitHub Issues
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    <i class="fas fa-check me-2"></i>Got It!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contactForm');
+    
+    contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        
+        // Show success message (in a real app, you'd send this to a server)
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show mt-3';
+        alert.innerHTML = `
+            <strong><i class="fas fa-check-circle me-2"></i>Message Sent!</strong>
+            Thank you for contacting us. We'll get back to you within 24-48 hours.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insert after form
+        contactForm.parentNode.insertBefore(alert, contactForm.nextSibling);
+        
+        // Reset form
+        contactForm.reset();
+        
+        // Scroll to alert
+        alert.scrollIntoView({ behavior: 'smooth' });
+    });
+    
+    // Form validation enhancement
+    const inputs = contactForm.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.checkValidity()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+    });
+
+    // Documentation modal enhancements
+    const docsModal = document.getElementById('docsModal');
+    
+    // Smooth scrolling for modal content
+    docsModal.addEventListener('shown.bs.modal', function() {
+        // Focus on the modal for accessibility
+        this.querySelector('.modal-body').focus();
+        
+        // Add smooth scroll behavior to modal body
+        const modalBody = this.querySelector('.modal-body');
+        modalBody.style.scrollBehavior = 'smooth';
+    });
+    
+    // Reset scroll position when modal is hidden
+    docsModal.addEventListener('hidden.bs.modal', function() {
+        const modalBody = this.querySelector('.modal-body');
+        modalBody.scrollTop = 0;
+    });
+    
+    // Add keyboard navigation for modal
+    docsModal.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = bootstrap.Modal.getInstance(this);
+            if (modal) {
+                modal.hide();
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.documentation-content {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.documentation-content h4 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.documentation-content h4:first-child {
+    margin-top: 0;
+}
+
+.step-guide .badge {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+}
+
+.modal-dialog-scrollable .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.documentation-content .alert {
+    border-left: 4px solid;
+    border-radius: 0.375rem;
+}
+
+.documentation-content .alert-info {
+    border-left-color: #0dcaf0;
+}
+
+.documentation-content .alert-success {
+    border-left-color: #198754;
+}
+
+.documentation-content .alert-warning {
+    border-left-color: #ffc107;
+}
+
+.modal-header {
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+}
+
+.modal-footer {
+    border-top: 2px solid rgba(0,0,0,0.1);
+}
+
+/* Ensure proper spacing in documentation sections */
+.documentation-content section + section {
+    border-top: 1px solid #e9ecef;
+    padding-top: 1.5rem;
+}
+
+/* Enhanced card styling in modal */
+.documentation-content .card {
+    transition: transform 0.2s ease-in-out;
+    border: 1px solid rgba(0,0,0,0.125);
+}
+
+.documentation-content .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Custom styling for step numbers */
+.step-guide .d-flex:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 45px;
+    width: 2px;
+    height: 30px;
+    background: #dee2e6;
+    z-index: 1;
+}
+
+.step-guide {
+    position: relative;
+}
+
+/* Print friendly styles */
+@media print {
+    .modal {
+        position: static !important;
+        display: block !important;
+    }
+    
+    .modal-dialog {
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+    
+    .modal-header, .modal-footer {
+        display: none !important;
+    }
+}
+</style>
+{% endblock %}

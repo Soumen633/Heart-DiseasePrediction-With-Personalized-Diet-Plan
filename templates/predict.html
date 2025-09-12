@@ -1,0 +1,906 @@
+
+{% extends "base.html" %}
+
+{% block title %}Heart Disease Prediction - CarePulse{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Progress Indicator -->
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <h6>Completion Progress</h6>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                        <span id="completedFields">0</span> of 20 features completed
+                    </small>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-heartbeat text-primary me-2"></i>
+                        Heart Disease Risk Assessment
+                    </h3>
+                    <p class="text-muted mt-2 mb-0">
+                        Please fill in your comprehensive health information for accurate prediction
+                    </p>
+                </div>
+                
+                <div class="card-body">
+                    <form method="POST" id="predictionForm">
+                        <div class="row">
+                            <!-- Age -->
+                            <div class="col-md-6 mb-3">
+                                <label for="age" class="form-label">
+                                    <i class="fas fa-birthday-cake me-1"></i>Age (years)
+                                    <small class="text-success ms-2">1/20</small>
+                                </label>
+                                <input type="number" class="form-control" id="age" name="age" 
+                                       min="1" max="120" required 
+                                       placeholder="Enter your age">
+                                <div class="form-text">Enter your current age in years</div>
+                            </div>
+                            
+                            <!-- Gender -->
+                            <div class="col-md-6 mb-3">
+                                <label for="gender" class="form-label">
+                                    <i class="fas fa-venus-mars me-1"></i>Gender
+                                    <small class="text-success ms-2">2/20</small>
+                                </label>
+                                <select class="form-select" id="gender" name="gender" required>
+                                    <option value="">Select your gender</option>
+                                    <option value="1">Male</option>
+                                    <option value="0">Female</option>
+                                </select>
+                                <div class="form-text">Biological gender</div>
+                            </div>
+                            
+                            <!-- Blood Pressure -->
+                            <div class="col-md-6 mb-3">
+                                <label for="blood_pressure" class="form-label">
+                                    <i class="fas fa-thermometer-half me-1"></i>Blood Pressure (mmHg)
+                                    <small class="text-success ms-2">3/20</small>
+                                </label>
+                                <input type="number" class="form-control" id="blood_pressure" name="blood_pressure" 
+                                       min="50" max="250" required 
+                                       placeholder="e.g., 120">
+                                <div class="form-text">Normal range: 90-140 mmHg</div>
+                            </div>
+                            
+                            <!-- Cholesterol -->
+                            <div class="col-md-6 mb-3">
+                                <label for="cholesterol" class="form-label">
+                                    <i class="fas fa-vial me-1"></i>Cholesterol Level (mg/dL)
+                                    <small class="text-success ms-2">4/20</small>
+                                </label>
+                                <input type="number" class="form-control" id="cholesterol" name="cholesterol" 
+                                       min="100" max="600" required 
+                                       placeholder="e.g., 200">
+                                <div class="form-text">Normal: <200 mg/dL, High: >240 mg/dL</div>
+                            </div>
+                            
+                            <!-- Exercise -->
+                            <div class="col-md-6 mb-3">
+                                <label for="exercise" class="form-label">
+                                    <i class="fas fa-running me-1"></i>Exercise Habits
+                                    <small class="text-success ms-2">5/20</small>
+                                </label>
+                                <select class="form-select" id="exercise" name="exercise" required>
+                                    <option value="">Select exercise level</option>
+                                    <option value="0">Sedentary (No exercise)</option>
+                                    <option value="1">Light (1-2 times/week)</option>
+                                    <option value="2">Moderate (3-4 times/week)</option>
+                                    <option value="3">Heavy (5+ times/week)</option>
+                                </select>
+                                <div class="form-text">Weekly exercise frequency</div>
+                            </div>
+                            
+                            <!-- Smoking -->
+                            <div class="col-md-6 mb-3">
+                                <label for="smoking" class="form-label">
+                                    <i class="fas fa-smoking-ban me-1"></i>Smoking Status
+                                    <small class="text-success ms-2">6/20</small>
+                                </label>
+                                <select class="form-select" id="smoking" name="smoking" required>
+                                    <option value="">Select smoking status</option>
+                                    <option value="0">Non-smoker</option>
+                                    <option value="1">Smoker</option>
+                                </select>
+                                <div class="form-text">Current smoking status</div>
+                            </div>
+                            
+                            <!-- Family History -->
+                            <div class="col-md-6 mb-3">
+                                <label for="family_heart_disease" class="form-label">
+                                    <i class="fas fa-users me-1"></i>Family History of Heart Disease
+                                    <small class="text-success ms-2">7/20</small>
+                                </label>
+                                <select class="form-select" id="family_heart_disease" name="family_heart_disease" required>
+                                    <option value="">Select option</option>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                                <div class="form-text">Family history of cardiovascular disease</div>
+                            </div>
+                            
+                            <!-- Diabetes -->
+                            <div class="col-md-6 mb-3">
+                                <label for="diabetes" class="form-label">
+                                    <i class="fas fa-tint me-1"></i>Diabetes Status
+                                    <small class="text-success ms-2">8/20</small>
+                                </label>
+                                <select class="form-select" id="diabetes" name="diabetes" required>
+                                    <option value="">Select diabetes status</option>
+                                    <option value="0">No diabetes</option>
+                                    <option value="1">Diabetic</option>
+                                </select>
+                                <div class="form-text">Current diabetes status</div>
+                            </div>
+                            
+                            <!-- BMI -->
+                            <div class="col-md-6 mb-3">
+                                <label for="bmi" class="form-label">
+                                    <i class="fas fa-weight me-1"></i>BMI (Body Mass Index)
+                                    <small class="text-success ms-2">9/20</small>
+                                </label>
+                                <input type="number" class="form-control" id="bmi" name="bmi" 
+                                       min="10" max="60" step="0.1" required 
+                                       placeholder="e.g., 25.0">
+                                <div class="form-text">Normal: 18.5-24.9, Overweight: 25-29.9, Obese: >30</div>
+                            </div>
+                            
+                            <!-- High BP History -->
+                            <div class="col-md-6 mb-3">
+                                <label for="high_bp_history" class="form-label">
+                                    <i class="fas fa-heartbeat me-1"></i>History of High Blood Pressure
+                                    <small class="text-success ms-2">10/20</small>
+                                </label>
+                                <select class="form-select" id="high_bp_history" name="high_bp_history" required>
+                                    <option value="">Select option</option>
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                                <div class="form-text">Previous diagnosis of hypertension</div>
+                            </div>
+                            
+                            <!-- Low HDL -->
+                            <div class="col-md-6 mb-3">
+                                <label for="low_hdl" class="form-label">
+                                    <i class="fas fa-vial me-1"></i>Low HDL Cholesterol
+                                    <small class="text-success ms-2">11/20</small>
+                                </label>
+                                <select class="form-select" id="low_hdl" name="low_hdl" required>
+                                    <option value="">Select option</option>
+                                    <option value="0">Normal HDL</option>
+                                    <option value="1">Low HDL</option>
+                                </select>
+                                <div class="form-text">Good cholesterol: <40 mg/dL for men, <50 for women</div>
+                            </div>
+                            
+                            <!-- High LDL -->
+                            <div class="col-md-6 mb-3">
+                                <label for="high_ldl" class="form-label">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>High LDL Cholesterol
+                                    <small class="text-success ms-2">12/20</small>
+                                </label>
+                                <select class="form-select" id="high_ldl" name="high_ldl" required>
+                                    <option value="">Select option</option>
+                                    <option value="0">Normal LDL</option>
+                                    <option value="1">High LDL</option>
+                                </select>
+                                <div class="form-text">Bad cholesterol: >160 mg/dL is high</div>
+                            </div>
+                            
+                            <!-- Alcohol -->
+                            <div class="col-md-6 mb-3">
+                                <label for="alcohol" class="form-label">
+                                    <i class="fas fa-wine-glass me-1"></i>Alcohol Consumption
+                                    <small class="text-success ms-2">13/20</small>
+                                </label>
+                                <select class="form-select" id="alcohol" name="alcohol" required>
+                                    <option value="">Select consumption level</option>
+                                    <option value="0">None</option>
+                                    <option value="1">Light (1-2 drinks/week)</option>
+                                    <option value="2">Moderate (3-7 drinks/week)</option>
+                                    <option value="3">Heavy (>7 drinks/week)</option>
+                                </select>
+                                <div class="form-text">Weekly alcohol consumption</div>
+                            </div>
+                            
+                            <!-- Stress Level -->
+                            <div class="col-md-6 mb-3">
+                                <label for="stress_level" class="form-label">
+                                    <i class="fas fa-brain me-1"></i>Stress Level (1-10 scale)
+                                    <small class="text-success ms-2">14/20</small>
+                                </label>
+                                <select class="form-select" id="stress_level" name="stress_level" required>
+                                    <option value="">Select stress level</option>
+                                    <option value="1">1 - Very Low</option>
+                                    <option value="2">2 - Low</option>
+                                    <option value="3">3 - Low</option>
+                                    <option value="4">4 - Moderate</option>
+                                    <option value="5">5 - Moderate</option>
+                                    <option value="6">6 - Moderate</option>
+                                    <option value="7">7 - High</option>
+                                    <option value="8">8 - High</option>
+                                    <option value="9">9 - Very High</option>
+                                    <option value="10">10 - Extreme</option>
+                                </select>
+                                <div class="form-text">1-3: Low, 4-6: Moderate, 7-10: High stress</div>
+                            </div>
+                            
+                            <!-- Sleep Hours -->
+                            <div class="col-md-6 mb-3">
+                                <label for="sleep_hours" class="form-label">
+                                    <i class="fas fa-bed me-1"></i>Sleep Hours per Night
+                                    <small class="text-success ms-2">15/20</small>
+                                </label>
+                                <input type="number" class="form-control" id="sleep_hours" name="sleep_hours" 
+                                       min="2" max="16" step="0.5" required 
+                                       placeholder="e.g., 7.5">
+                                <div class="form-text">Recommended: 7-9 hours</div>
+                            </div>
+                            
+                            <!-- Sugar Consumption -->
+                            <div class="col-md-6 mb-3">
+                                <label for="sugar_consumption" class="form-label">
+                                    <i class="fas fa-candy-cane me-1"></i>Daily Sugar Consumption
+                                    <small class="text-success ms-2">16/20</small>
+                                </label>
+                                <select class="form-select" id="sugar_consumption" name="sugar_consumption" required>
+                                    <option value="">Select sugar consumption</option>
+                                    <option value="0">Low (<25g/day)</option>
+                                    <option value="1">Moderate (25-50g/day)</option>
+                                    <option value="2">High (>50g/day)</option>
+                                </select>
+                                <div class="form-text">Daily sugar intake level</div>
+                            </div>
+                            
+                            <!-- Triglycerides -->
+                            <div class="col-md-6 mb-3">
+                                <label for="triglycerides" class="form-label">
+                                    <i class="fas fa-flask me-1"></i>Triglyceride Level (mg/dL)
+                                    <small class="text-success ms-2">17/20</small>
+                                </label>
+                                <input type="number" class="form-control" id="triglycerides" name="triglycerides" 
+                                       min="50" max="1000" required 
+                                       placeholder="e.g., 150">
+                                <div class="form-text">Normal: <150 mg/dL, High: >200 mg/dL</div>
+                            </div>
+                            
+                            <!-- Fasting Blood Sugar -->
+                            <div class="col-md-6 mb-3">
+                                <label for="fasting_blood_sugar" class="form-label">
+                                    <i class="fas fa-tint me-1"></i>Fasting Blood Sugar (mg/dL)
+                                    <small class="text-success ms-2">18/20</small>
+                                </label>
+                                <input type="number" class="form-control" id="fasting_blood_sugar" name="fasting_blood_sugar" 
+                                       min="50" max="400" required 
+                                       placeholder="e.g., 95">
+                                <div class="form-text">Normal: <100, Prediabetic: 100-125, Diabetic: >125</div>
+                            </div>
+                            
+                            <!-- CRP Level -->
+                            <div class="col-md-6 mb-3">
+                                <label for="crp_level" class="form-label">
+                                    <i class="fas fa-microscope me-1"></i>CRP Level (mg/L)
+                                    <small class="text-success ms-2">19/20</small>
+                                </label>
+                                <input type="number" class="form-control" id="crp_level" name="crp_level" 
+                                       min="0" max="50" step="0.1" required 
+                                       placeholder="e.g., 2.0">
+                                <div class="form-text">C-reactive protein - Normal: <3.0 mg/L</div>
+                            </div>
+                            
+                            <!-- Homocysteine -->
+                            <div class="col-md-6 mb-3">
+                                <label for="homocysteine" class="form-label">
+                                    <i class="fas fa-atom me-1"></i>Homocysteine Level (μmol/L)
+                                    <small class="text-success ms-2">20/20</small>
+                                </label>
+                                <input type="number" class="form-control" id="homocysteine" name="homocysteine" 
+                                       min="0" max="100" step="0.1" required 
+                                       placeholder="e.g., 10.0">
+                                <div class="form-text">Normal: 5-15 μmol/L, High: >15 μmol/L</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-calculator me-2"></i>
+                                Predict Heart Disease Risk
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Help Section -->
+            <!-- Updated Help Section with Clickable Info Button -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0 d-flex align-items-center">
+            <button type="button" class="btn btn-info btn-sm me-2" id="dataDictionaryBtn" data-bs-toggle="modal" data-bs-target="#dataDictionaryModal">
+                <i class="fas fa-info-circle"></i>
+            </button>
+            Need Help Understanding These terms?
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-info-circle text-primary me-1"></i>Quick Reference:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>BMI:</strong> Body Mass Index - weight to height ratio</li>
+                    <li><strong>HDL/LDL:</strong> Good and bad cholesterol types</li>
+                    <li><strong>CRP:</strong> C-reactive protein - inflammation marker</li>
+                    <li><strong>Homocysteine:</strong> Amino acid linked to heart disease</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-lightbulb text-warning me-1"></i>Tips for Accurate Results:</h6>
+                <ul class="list-unstyled">
+                    <li>• Use recent medical test results</li>
+                    <li>• Consult your doctor for unclear values</li>
+                    <li>• Be honest with all information</li>
+                    <li>• Keep your medical records handy</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Dictionary Modal -->
+<div class="modal fade" id="dataDictionaryModal" tabindex="-1" aria-labelledby="dataDictionaryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="dataDictionaryModalLabel">
+                    <i class="fas fa-book me-2"></i>
+                    Comprehensive Data Dictionary
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>About This Dictionary:</strong> This comprehensive guide explains each variable used in our heart disease prediction model. Use this reference to better understand what each field means and how to provide accurate information.
+                </div>
+                
+                <!-- Data Dictionary Table -->
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark sticky-top">
+                            <tr>
+                                <th style="width: 15%;">Variable</th>
+                                <th style="width: 25%;">Description</th>
+                                <th style="width: 12%;">Type</th>
+                                <th style="width: 20%;">Values / Range</th>
+                                <th style="width: 28%;">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Age</strong></td>
+                                <td>Age of the patient.</td>
+                                <td><span class="badge bg-secondary">Numeric</span><br><small>Discrete</small></td>
+                                <td><code>18 - 80</code> years</td>
+                                <td>Current age in completed years</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Gender</strong></td>
+                                <td>Biological sex of the patient.</td>
+                                <td><span class="badge bg-info">Categorical</span><br><small>Nominal</small></td>
+                                <td><code>Male</code>, <code>Female</code></td>
+                                <td>Biological gender classification</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Blood Pressure</strong></td>
+                                <td>Systolic blood pressure reading.</td>
+                                <td><span class="badge bg-secondary">Numeric</span><br><small>Continuous</small></td>
+                                <td><code>~120 - 180</code> mmHg</td>
+                                <td><strong>Key indicator of hypertension.</strong> Normal: <120, Elevated: 120-129, High: ≥130</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cholesterol Level</strong></td>
+                                <td>Total serum cholesterol level.</td>
+                                <td><span class="badge bg-secondary">Numeric</span><br><small>Continuous</small></td>
+                                <td><code>~150 - 300</code> mg/dL</td>
+                                <td>Desirable: <200, Borderline: 200-239, High: ≥240</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Exercise Habits</strong></td>
+                                <td>Self-reported level of physical activity.</td>
+                                <td><span class="badge bg-warning">Categorical</span><br><small>Ordinal</small></td>
+                                <td><code>Low</code>, <code>Medium</code>, <code>High</code></td>
+                                <td>Weekly frequency and intensity of physical exercise</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Smoking</strong></td>
+                                <td>Current smoking status.</td>
+                                <td><span class="badge bg-danger">Binary</span></td>
+                                <td><code>Yes</code>, <code>No</code></td>
+                                <td>Current tobacco smoking habit</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Family Heart Disease</strong></td>
+                                <td>Family history of heart disease.</td>
+                                <td><span class="badge bg-danger">Binary</span></td>
+                                <td><code>Yes</code>, <code>No</code></td>
+                                <td>Genetic predisposition indicator</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Diabetes</strong></td>
+                                <td>Diagnosed diabetes status.</td>
+                                <td><span class="badge bg-danger">Binary</span></td>
+                                <td><code>Yes</code>, <code>No</code></td>
+                                <td>Type 1 or Type 2 diabetes diagnosis</td>
+                            </tr>
+                            <tr>
+                                <td><strong>BMI</strong></td>
+                                <td>Body Mass Index.</td>
+                                <td><span class="badge bg-secondary">Numeric</span><br><small>Continuous</small></td>
+                                <td><code>~18 - 40</code> kg/m²</td>
+                                <td><strong>Calculated from weight and height.</strong> Underweight: <18.5, Normal: 18.5-24.9, Overweight: 25-29.9, Obese: ≥30</td>
+                            </tr>
+                            <tr>
+                                <td><strong>High Blood Pressure</strong></td>
+                                <td>Diagnosis of hypertension.</td>
+                                <td><span class="badge bg-danger">Binary</span></td>
+                                <td><code>Yes</code>, <code>No</code></td>
+                                <td><strong>May be correlated with the Blood Pressure reading.</strong> Diagnosed hypertension history</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Low HDL Cholesterol</strong></td>
+                                <td>Indicator of low High-Density Lipoprotein ("good" cholesterol).</td>
+                                <td><span class="badge bg-danger">Binary</span></td>
+                                <td><code>Yes</code>, <code>No</code></td>
+                                <td>HDL <40 mg/dL (men) or <50 mg/dL (women)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>High LDL Cholesterol</strong></td>
+                                <td>Indicator of high Low-Density Lipoprotein ("bad" cholesterol).</td>
+                                <td><span class="badge bg-danger">Binary</span></td>
+                                <td><code>Yes</code>, <code>No</code></td>
+                                <td>LDL ≥160 mg/dL indicates high risk</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Alcohol Consumption</strong></td>
+                                <td>Self-reported level of alcohol intake.</td>
+                                <td><span class="badge bg-warning">Categorical</span><br><small>Ordinal</small></td>
+                                <td><code>None</code>, <code>Low</code>, <code>Medium</code>, <code>High</code></td>
+                                <td>Weekly alcohol consumption frequency</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Stress Level</strong></td>
+                                <td>Self-reported level of stress.</td>
+                                <td><span class="badge bg-warning">Categorical</span><br><small>Ordinal</small></td>
+                                <td><code>Low</code>, <code>Medium</code>, <code>High</code></td>
+                                <td>Psychological stress assessment scale</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sleep Hours</strong></td>
+                                <td>Self-reported average hours of sleep per night.</td>
+                                <td><span class="badge bg-secondary">Numeric</span><br><small>Continuous</small></td>
+                                <td><code>~4 - 10</code> hours</td>
+                                <td>Recommended: 7-9 hours for adults</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sugar Consumption</strong></td>
+                                <td>Self-reported level of dietary sugar intake.</td>
+                                <td><span class="badge bg-warning">Categorical</span><br><small>Ordinal</small></td>
+                                <td><code>Low</code>, <code>Medium</code>, <code>High</code></td>
+                                <td>Daily added sugar consumption level</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Triglyceride Level</strong></td>
+                                <td>Level of triglycerides in the blood.</td>
+                                <td><span class="badge bg-secondary">Numeric</span><br><small>Continuous</small></td>
+                                <td><code>~100 - 400</code> mg/dL</td>
+                                <td><strong>A type of fat (lipid) found in your blood.</strong> Normal: <150, Borderline: 150-199, High: ≥200</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fasting Blood Sugar</strong></td>
+                                <td>Level of glucose in the blood after fasting.</td>
+                                <td><span class="badge bg-secondary">Numeric</span><br><small>Continuous</small></td>
+                                <td><code>~80 - 160</code> mg/dL</td>
+                                <td><strong>Key indicator for diabetes and prediabetes.</strong> Normal: <100, Prediabetic: 100-125, Diabetic: ≥126</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CRP Level</strong></td>
+                                <td>C-Reactive Protein level, a marker of inflammation.</td>
+                                <td><span class="badge bg-secondary">Numeric</span><br><small>Continuous</small></td>
+                                <td><code>~0 - 15</code> mg/L</td>
+                                <td><strong>Higher levels indicate inflammation.</strong> Low risk: <1.0, Average: 1.0-3.0, High: >3.0</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Homocysteine Level</strong></td>
+                                <td>Level of homocysteine, an amino acid.</td>
+                                <td><span class="badge bg-secondary">Numeric</span><br><small>Continuous</small></td>
+                                <td><code>~5 - 20</code> µmol/L</td>
+                                <td><strong>High levels are a risk factor for heart disease.</strong> Normal: 5-15, Moderate: 15-30, High: >30</td>
+                            </tr>
+                            <tr class="table-warning">
+                                <td><strong>Heart Disease Status</strong></td>
+                                <td>Target variable. Presence of heart disease.</td>
+                                <td><span class="badge bg-success">Binary Target</span></td>
+                                <td><code>No</code>, <code>Yes</code></td>
+                                <td><strong>Note:</strong> This is what our model predicts based on your input values</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Additional Information Sections -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Understanding Risk Factors</h6>
+                            </div>
+                            <div class="card-body">
+                                <h6>Major Risk Factors:</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-exclamation-triangle text-danger me-2"></i>High blood pressure</li>
+                                    <li><i class="fas fa-exclamation-triangle text-danger me-2"></i>High cholesterol</li>
+                                    <li><i class="fas fa-exclamation-triangle text-danger me-2"></i>Smoking</li>
+                                    <li><i class="fas fa-exclamation-triangle text-danger me-2"></i>Diabetes</li>
+                                    <li><i class="fas fa-exclamation-triangle text-danger me-2"></i>Family history</li>
+                                </ul>
+                                
+                                <h6 class="mt-3">Modifiable Factors:</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check-circle text-success me-2"></i>Exercise habits</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i>Diet (sugar consumption)</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i>Sleep patterns</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i>Stress management</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i>Alcohol consumption</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0"><i class="fas fa-flask me-2"></i>Lab Values Reference</h6>
+                            </div>
+                            <div class="card-body">
+                                <h6>Normal Ranges:</h6>
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Total Cholesterol:</strong></td>
+                                            <td>&lt;200 mg/dL</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>LDL (Bad):</strong></td>
+                                            <td>&lt;100 mg/dL</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>HDL (Good):</strong></td>
+                                            <td>&gt;40 mg/dL (M), &gt;50 mg/dL (F)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Triglycerides:</strong></td>
+                                            <td>&lt;150 mg/dL</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Fasting Glucose:</strong></td>
+                                            <td>&lt;100 mg/dL</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Blood Pressure:</strong></td>
+                                            <td>&lt;120/80 mmHg</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>CRP:</strong></td>
+                                            <td>&lt;3.0 mg/L</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Homocysteine:</strong></td>
+                                            <td>5-15 µmol/L</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Disclaimer -->
+                <div class="alert alert-warning mt-4">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Important Disclaimer:</h6>
+                    <p class="mb-0">This prediction tool is for educational purposes only and should not replace professional medical advice. Always consult with your healthcare provider for proper diagnosis and treatment of heart-related conditions. The accuracy of predictions depends on the quality and completeness of the information provided.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Close
+                </button>
+                <button type="button" class="btn btn-primary" onclick="window.print()">
+                    <i class="fas fa-print me-2"></i>Print Reference
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Enhanced Modal Styles */
+.modal-xl {
+    max-width: 95%;
+}
+
+.modal-body {
+    font-size: 0.95rem;
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.table td {
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.badge {
+    font-size: 0.7rem;
+}
+
+/* Sticky header for scrolling */
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Custom scrollbar for modal body */
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Responsive table improvements */
+@media (max-width: 768px) {
+    .modal-xl {
+        max-width: 98%;
+        margin: 0.5rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+}
+
+/* Info button styling */
+#dataDictionaryBtn {
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#dataDictionaryBtn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+}
+
+/* Animation for modal */
+.modal.fade .modal-dialog {
+    transition: transform 0.4s ease-out;
+    transform: translate(0, -50px);
+}
+
+.modal.show .modal-dialog {
+    transform: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the modal
+    const dataDictionaryModal = new bootstrap.Modal(document.getElementById('dataDictionaryModal'));
+    
+    // Add click event to the info button
+    document.getElementById('dataDictionaryBtn').addEventListener('click', function() {
+        // Add some animation or feedback
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            this.style.transform = 'scale(1)';
+        }, 150);
+    });
+    
+    // Add keyboard navigation
+    document.getElementById('dataDictionaryModal').addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            dataDictionaryModal.hide();
+        }
+    });
+    
+    // Track modal usage for analytics (optional)
+    document.getElementById('dataDictionaryModal').addEventListener('shown.bs.modal', function() {
+        console.log('Data Dictionary Modal opened');
+        // You can add analytics tracking here if needed
+    });
+});
+</script>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.getElementById('predictionForm');
+    const inputs = form.querySelectorAll('input, select');
+    const progressBar = document.getElementById('progressBar');
+    const completedFields = document.getElementById('completedFields');
+    const totalFields = 20;
+    
+    // Update progress bar
+    function updateProgress() {
+        const filledInputs = form.querySelectorAll('input:valid, select:valid').length;
+        const progress = (filledInputs / totalFields) * 100;
+        progressBar.style.width = progress + '%';
+        completedFields.textContent = filledInputs;
+        
+        // Change color based on progress
+        progressBar.className = 'progress-bar';
+        if (progress === 100) {
+            progressBar.classList.add('bg-success');
+        } else if (progress >= 50) {
+            progressBar.classList.add('bg-info');
+        } else {
+            progressBar.classList.add('bg-warning');
+        }
+    }
+    
+    // Add real-time validation and progress tracking
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+            updateProgress();
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                validateField(this);
+            }
+            updateProgress();
+        });
+        
+        input.addEventListener('change', function() {
+            updateProgress();
+        });
+    });
+    
+    function validateField(field) {
+        const value = field.value.trim();
+        let isValid = true;
+        let errorMessage = '';
+        
+        // Check if required field is empty
+        if (field.hasAttribute('required') && !value) {
+            isValid = false;
+            errorMessage = 'This field is required';
+        }
+        
+        // Specific validations
+        if (value && field.type === 'number') {
+            const min = parseFloat(field.min);
+            const max = parseFloat(field.max);
+            const val = parseFloat(value);
+            
+            if (min && val < min) {
+                isValid = false;
+                errorMessage = `Value must be at least ${min}`;
+            } else if (max && val > max) {
+                isValid = false;
+                errorMessage = `Value must be at most ${max}`;
+            }
+        }
+        
+        // Update field appearance
+        if (isValid) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+            removeErrorMessage(field);
+        } else {
+            field.classList.remove('is-valid');
+            field.classList.add('is-invalid');
+            showErrorMessage(field, errorMessage);
+        }
+        
+        return isValid;
+    }
+    
+    function showErrorMessage(field, message) {
+        removeErrorMessage(field);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'invalid-feedback';
+        errorDiv.textContent = message;
+        field.parentNode.appendChild(errorDiv);
+    }
+    
+    function removeErrorMessage(field) {
+        const existingError = field.parentNode.querySelector('.invalid-feedback');
+        if (existingError) {
+            existingError.remove();
+        }
+    }
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        let isFormValid = true;
+        
+        inputs.forEach(input => {
+            if (!validateField(input)) {
+                isFormValid = false;
+            }
+        });
+        
+        if (!isFormValid) {
+            e.preventDefault();
+            
+            // Scroll to first invalid field
+            const firstInvalid = form.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalid.focus();
+            }
+            
+            // Show error alert
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-danger alert-dismissible fade show';
+            alert.innerHTML = `
+                <strong><i class="fas fa-exclamation-triangle me-2"></i>Form Error!</strong>
+                Please correct the errors above before submitting.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            form.insertBefore(alert, form.firstChild);
+        }
+    });
+    
+    // Initialize progress
+    updateProgress();
+    
+    // Add tooltips to form fields
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

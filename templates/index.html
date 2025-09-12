@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}CarePulse - Advanced Heart Disease Prediction{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+ <!-- <link rel="icon" href="assets/fav_icon.jpg" type="image/jpeg" /> -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h1 class="hero-title fade-in-up">
+                    <i class="fas fa-heartbeat me-3"></i>
+                    CarePulse
+                </h1>
+                <p class="hero-subtitle fade-in-up">
+                    Advanced AI-powered heart disease prediction with personalized diet recommendations for a healthier life
+                </p>
+                <div class="fade-in-up">
+                    <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-stethoscope me-2"></i>Start Health Check
+                    </a>
+                    <a href="#features" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-info-circle me-2"></i>Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card">
+                    <div class="stats-number">92%</div>
+                    <div class="stats-label">Accuracy Rate</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card">
+                    <div class="stats-number">100+</div>
+                    <div class="stats-label">Predictions Made</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card">
+                    <div class="stats-number">300+</div>
+                    <div class="stats-label">Diet Plans Created</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card">
+                    <div class="stats-number">24/7</div>
+                    <div class="stats-label">Available</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="text-white display-5 fw-bold mb-3">Why Choose CarePulse?</h2>
+                <p class="text-white-50 fs-5">Advanced machine learning meets personalized healthcare</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-brain fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">AI-Powered Analysis</h5>
+                        <p class="card-text">
+                            Our advanced machine learning model analyzes 20 key health parameters to provide accurate heart disease risk assessment with 92% accuracy.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-utensils fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title">Personalized Diet Plans</h5>
+                        <p class="card-text">
+                            Get customized diet recommendations based on your risk level, dietary preferences, and health goals. Available in vegetarian and non-vegetarian options.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-download fa-3x text-warning"></i>
+                        </div>
+                        <h5 class="card-title">PDF Reports</h5>
+                        <p class="card-text">
+                            Download comprehensive PDF reports with your health assessment results and detailed diet charts for easy sharing with healthcare providers.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-shield-alt fa-3x text-info"></i>
+                        </div>
+                        <h5 class="card-title">Privacy & Security</h5>
+                        <p class="card-text">
+                            Your health data is processed securely and never stored permanently. We prioritize your privacy and follow strict data protection protocols.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-clock fa-3x text-secondary"></i>
+                        </div>
+                        <h5 class="card-title">Instant Results</h5>
+                        <p class="card-text">
+                            Get your heart disease risk assessment and personalized diet plan in seconds. No waiting, no appointments needed.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-mobile-alt fa-3x text-purple"></i>
+                        </div>
+                        <h5 class="card-title">Mobile Friendly</h5>
+                        <p class="card-text">
+                            Access CarePulse from any device - desktop, tablet, or smartphone. Our responsive design works perfectly everywhere.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="text-white display-5 fw-bold mb-3">How It Works</h2>
+                <p class="text-white-50 fs-5">Simple 3-step process to better health</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <span class="fs-4 fw-bold">1</span>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Input Health Data</h5>
+                        <p class="card-text">
+                            Enter your health parameters including age, blood pressure, cholesterol levels, and other vital signs through our user-friendly form.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <span class="fs-4 fw-bold">2</span>
+                            </div>
+                        </div>
+                        <h5 class="card-title">AI Analysis</h5>
+                        <p class="card-text">
+                            Our advanced machine learning model analyzes your data and calculates your personalized heart disease risk probability.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <span class="fs-4 fw-bold">3</span>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Get Diet Plan</h5>
+                        <p class="card-text">
+                            Receive a personalized diet plan based on your risk level, with multiple options and downloadable PDF reports.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body text-center p-5">
+                        <h3 class="card-title mb-3">Ready to Take Control of Your Heart Health?</h3>
+                        <p class="card-text fs-5 mb-4">
+                            Join thousands of users who have already improved their health with CarePulse. 
+                            Get your personalized heart disease risk assessment and diet plan today.
+                        </p>
+                        <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-heartbeat me-2"></i>Start Your Health Journey
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="text-white display-5 fw-bold mb-3">What Our Users Say</h2>
+                <p class="text-white-50 fs-5">Real stories from real people</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left fa-2x text-primary"></i>
+                        </div>
+                        <p class="card-text">
+                            "CarePulse helped me understand my heart health risk and provided an amazing diet plan. 
+                            I've already started following it and feeling much better!"
+                        </p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="flex-shrink-0">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0">Sarah Johnson</h6>
+                                <small class="text-muted">Teacher, 45</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left fa-2x text-success"></i>
+                        </div>
+                        <p class="card-text">
+                            "The accuracy of the prediction and the personalized diet plan exceeded my expectations. 
+                            It's like having a personal nutritionist and cardiologist in one app."
+                        </p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="flex-shrink-0">
+                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0">Michael Chen</h6>
+                                <small class="text-muted">Engineer, 38</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left fa-2x text-warning"></i>
+                        </div>
+                        <p class="card-text">
+                            "I love how easy it is to use and how comprehensive the reports are. 
+                            I shared my PDF report with my doctor and he was impressed with the analysis."
+                        </p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="flex-shrink-0">
+                                <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0">Dr. Priya Patel</h6>
+                                <small class="text-muted">Physician, 52</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .text-purple {
+        color: #7c3aed !important;
+    }
+    
+    .bg-purple {
+        background-color: #7c3aed !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,895 @@
+{% extends "base.html" %}
+
+{% block title %}Your Diet Charts - CarePulse{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header Section -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10 text-center">
+            <h2 class="text-white display-6 fw-bold mb-3">
+                <i class="fas fa-chart-pie me-2"></i>
+                Your Personalized Diet Charts
+            </h2>
+            <p class="text-white-50">
+                {{ diet_charts|length }} customized meal plans for your 
+                <span class="badge bg-{{ outcome.risk_color }}">{{ outcome.risk_level }}</span>
+            </p>
+        </div>
+    </div>
+    
+    <!-- Image Tooltip (Hidden by default) -->
+    <div id="food-image-tooltip" style="display: none; position: fixed; z-index: 10000; background: white; border: 2px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); max-width: 300px;">
+        <img id="tooltip-image" src="" alt="" style="width: 100%; max-width: 280px; height: auto; border-radius: 4px; display: none;">
+        <div id="tooltip-loading" style="text-align: center; padding: 20px;">
+            <i class="fas fa-spinner fa-spin"></i> Loading image...
+        </div>
+        <div id="tooltip-error" style="text-align: center; padding: 20px; display: none;">
+            <i class="fas fa-image text-muted"></i><br>
+            <small class="text-muted">Image not available</small>
+        </div>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="row g-3 justify-content-center">
+                {% for chart in diet_charts %}
+                <div class="col-lg-4 col-md-6 col-sm-8 {% if diet_charts|length == 1 %}col-xl-4{% elif diet_charts|length == 2 %}col-lg-5{% endif %}">
+                    <div class="card {% if chart.is_recommended %}border-warning{% endif %}">
+                        {% if chart.is_recommended %}
+                        <div class="card-header bg-warning text-dark text-center py-2">
+                            <i class="fas fa-star me-1"></i>
+                            <strong>RECOMMENDED</strong>
+                        </div>
+                        {% endif %}
+                        <div class="card-body text-center">
+                            <h5 class="card-title">
+                                <i class="fas fa-utensils me-2 text-primary"></i>
+                                Chart #{{ chart.chart_number }}
+                            </h5>
+                            <div class="display-6 fw-bold text-{{ outcome.risk_color }} mb-2">
+                                {{ chart.total_calories }}
+                            </div>
+                            <p class="text-muted">Total Daily Calories</p>
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Breakfast</small>
+                                    <strong>{{ chart.breakfast|length }} items</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Lunch</small>
+                                    <strong>{{ chart.lunch|length }} items</strong>
+                                </div>
+                            </div>
+                            <div class="row text-center mt-2">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Snacks</small>
+                                    <strong>{{ chart.snacks|length }} items</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Dinner</small>
+                                    <strong>{{ chart.dinner|length }} items</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Image Loading Status -->
+    <div class="row justify-content-center mb-3">
+        <div class="col-lg-10">
+            <div class="alert alert-info" id="imageLoadingStatus">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-download me-2"></i>
+                    <span>Food images are being downloaded from Bing. Hover over food items to see images as they become available.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed Diet Charts -->
+    {% for chart in diet_charts %}
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="card {% if chart.is_recommended %}border-warning border-2{% endif %}">
+                <div class="card-header {% if chart.is_recommended %}bg-warning text-dark{% else %}bg-primary text-white{% endif %}">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="mb-0">
+                                <i class="fas fa-clipboard-list me-2"></i>
+                                Diet Chart #{{ chart.chart_number }}
+                                {% if chart.is_recommended %}
+                                <span class="badge bg-dark ms-2">
+                                    <i class="fas fa-star me-1"></i>RECOMMENDED
+                                </span>
+                                {% endif %}
+                            </h4>
+                        </div>
+                        <div class="col-md-4 text-md-end text-center mt-2 mt-md-0">
+                            <span class="badge {% if chart.is_recommended %}bg-dark{% else %}bg-light text-dark{% endif %} fs-6 px-3 py-2">
+                                {{ chart.total_calories }} Total Calories
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <!-- Breakfast Section -->
+                    {% set meal_data = [
+                        ('breakfast', chart.breakfast, 'fas fa-sun', 'warning', 'Breakfast'),
+                        ('lunch', chart.lunch, 'fas fa-sun', 'primary', 'Lunch'),
+                        ('snacks', chart.snacks, 'fas fa-apple-alt', 'success', 'Snacks'),
+                        ('dinner', chart.dinner, 'fas fa-moon', 'info', 'Dinner')
+                    ] %}
+                    
+                    {% for meal_key, meal_items, icon, color, title in meal_data %}
+                    {% if meal_items %}
+                    <div class="border-bottom">
+                        <div class="p-4">
+                            <div class="row align-items-center mb-3">
+                                <div class="col-md-6">
+                                    <h5 class="mb-0 text-{{ color }}">
+                                        <i class="{{ icon }} me-2"></i>{{ title }}
+                                    </h5>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    {% set meal_calories = meal_items | sum(attribute='calories') %}
+                                    <span class="badge bg-{{ color }} fs-6">
+                                        {{ meal_calories }} calories
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3">
+                                {% for item in meal_items %}
+                                <div class="col-lg-4 col-md-6">
+                                    <div class="card border-0 bg-light h-100 food-item-card" 
+                                         data-food-name="{{ item.name }}"
+                                         style="cursor: pointer; transition: all 0.3s ease; position: relative;">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-start">
+                                                <div class="flex-shrink-0">
+                                                    <div class="bg-{{ color }} text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                                         style="width: 40px; height: 40px;">
+                                                        <i class="fas fa-utensils"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1 ms-3">
+                                                    <h6 class="card-title mb-1">{{ item.name }}</h6>
+                                                    <div class="d-flex align-items-center justify-content-between">
+                                                        <span class="badge bg-secondary">
+                                                            {{ item.calories }} cal
+                                                        </span>
+                                                        <small class="image-status text-muted" data-food="{{ item.name }}">
+                                                            <i class="fas fa-spinner fa-spin"></i>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    <!-- Calorie Comparison Chart -->
+    <div class="row justify-content-center mb-4">
+        <div class="{% if diet_charts|length == 1 %}col-lg-6 col-md-8{% else %}col-lg-10{% endif %}">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Calorie Comparison
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center justify-content-center">
+                        {% for chart in diet_charts %}
+                        <div class="col-lg-4 col-md-6 col-sm-8 {% if diet_charts|length == 1 %}col-xl-4{% elif diet_charts|length == 2 %}col-lg-5{% endif %} mb-3">
+                            <div class="text-center">
+                                <h6>Chart #{{ chart.chart_number }}</h6>
+                                {% if chart.is_recommended %}
+                                <div class="badge bg-warning text-dark mb-2">
+                                    <i class="fas fa-star me-1"></i>Recommended
+                                </div>
+                                {% endif %}
+                                <div class="progress mb-2" style="height: 25px;">
+                                    {% set max_calories = diet_charts | map(attribute='total_calories') | max %}
+                                    {% set percentage = (chart.total_calories / max_calories * 100) | round %}
+                                    <div class="progress-bar {% if chart.is_recommended %}bg-warning{% else %}bg-{{ outcome.risk_color }}{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ percentage }}%">
+                                        {{ chart.total_calories }}
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ chart.total_calories }} calories</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Calorie Statistics -->
+                    <div class="row mt-4 text-center justify-content-center">
+                        {% if diet_charts|length == 1 %}
+                        <div class="col-lg-4 col-md-6 col-sm-8">
+                            <div class="bg-light p-3 rounded">
+                                <h6 class="text-primary">Total Calories</h6>
+                                <div class="h5">{{ diet_charts[0].total_calories }} cal</div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-md-4">
+                            <div class="bg-light p-3 rounded">
+                                <h6 class="text-success">Minimum</h6>
+                                <div class="h5">{{ diet_charts | map(attribute='total_calories') | min }} cal</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light p-3 rounded">
+                                <h6 class="text-primary">Average</h6>
+                                <div class="h5">{{ (diet_charts | map(attribute='total_calories') | sum / diet_charts | length) | round }} cal</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light p-3 rounded">
+                                <h6 class="text-warning">Maximum</h6>
+                                <div class="h5">{{ diet_charts | map(attribute='total_calories') | max }} cal</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body text-center p-4">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-download me-2"></i>
+                        Export Your Diet Plan
+                    </h5>
+                    <p class="card-text mb-4">
+                        Download a comprehensive PDF report with all your diet charts, nutritional information, 
+                        and recommendations that you can share with your healthcare provider.
+                    </p>
+                    
+                    <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+                        <a href="{{ url_for('download_pdf') }}" class="btn btn-success btn-lg px-4">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            Download PDF Report
+                        </a>
+                        
+                        <a href="{{ url_for('diet_plan_page') }}" class="btn btn-outline-primary btn-lg px-4">
+                            <i class="fas fa-edit me-2"></i>
+                            Modify Preferences
+                        </a>
+                        
+                        <a href="{{ url_for('predict') }}" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="fas fa-redo me-2"></i>
+                            New Assessment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Information -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                Usage Tips
+                            </h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Follow the recommended chart for optimal results</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Drink 8-10 glasses of water daily</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Maintain regular meal timings</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Adjust portions based on your activity level</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Hover over food items to see images</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Important Reminders
+                            </h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-info text-info me-2"></i>Consult your doctor before major diet changes</li>
+                                <li><i class="fas fa-info text-info me-2"></i>Monitor your body's response to new foods</li>
+                                <li><i class="fas fa-info text-info me-2"></i>Include regular physical activity</li>
+                                <li><i class="fas fa-info text-info me-2"></i>This plan complements, doesn't replace medical advice</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .border-2 {
+        border-width: 2px !important;
+    }
+    
+    .progress {
+        border-radius: 10px;
+        background-color: rgba(0,0,0,0.1);
+    }
+    
+    .progress-bar {
+        border-radius: 10px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000 !important;
+    }
+    
+    .card-hover {
+        transition: all 0.3s ease;
+    }
+    
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .food-item-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        border: 2px solid #007bff !important;
+    }
+    
+    #food-image-tooltip {
+        pointer-events: none;
+    }
+    
+    .image-status.ready {
+        color: #28a745 !important;
+    }
+    
+    .image-status.error {
+        color: #dc3545 !important;
+    }
+    
+    /* Responsive centering for single chart */
+    @media (min-width: 1200px) {
+        .row.justify-content-center .col-xl-4:only-child {
+            max-width: 400px;
+            flex: 0 0 auto;
+        }
+    }
+    
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .row.justify-content-center .col-lg-4:only-child {
+            max-width: 400px;
+            flex: 0 0 auto;
+        }
+    }
+    
+    @media (min-width: 768px) and (max-width: 991px) {
+        .row.justify-content-center .col-md-6:only-child {
+            max-width: 400px;
+            flex: 0 0 auto;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .display-6 {
+            font-size: 2rem;
+        }
+        
+        #food-image-tooltip {
+            max-width: 250px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ===== RELIABLE CLEANUP FUNCTIONALITY =====
+let sessionId = null;
+let cleanupExecuted = false;
+let pingInterval = null;
+
+// Register session and start monitoring
+async function initializeCleanupSession() {
+    try {
+        const response = await fetch('/register-diet-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        if (data.status === 'success') {
+            sessionId = data.session_id;
+            console.log(`Diet session registered: ${sessionId}`);
+            
+            // Start pinging server every 10 seconds to keep session alive
+            pingInterval = setInterval(pingServer, 10000);
+            
+            // Ping immediately to establish connection
+            pingServer();
+        }
+    } catch (error) {
+        console.error('Failed to register session:', error);
+    }
+}
+
+// Keep session alive with periodic pings
+async function pingServer() {
+    if (!sessionId) return;
+    
+    try {
+        await fetch('/ping-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ session_id: sessionId }),
+            keepalive: true
+        });
+    } catch (error) {
+        console.error('Ping failed:', error);
+    }
+}
+
+// Execute cleanup immediately
+async function executeCleanup(reason = 'page_leave') {
+    if (cleanupExecuted) return;
+    
+    cleanupExecuted = true;
+    console.log(`Executing cleanup: ${reason}`);
+    
+    // Stop pinging
+    if (pingInterval) {
+        clearInterval(pingInterval);
+        pingInterval = null;
+    }
+    
+    try {
+        // Use sendBeacon for more reliable delivery during page unload
+        const payload = JSON.stringify({
+            session_id: sessionId,
+            reason: reason,
+            timestamp: new Date().toISOString()
+        });
+        
+        if (navigator.sendBeacon) {
+            // sendBeacon is more reliable for page unload events
+            const success = navigator.sendBeacon('/cleanup-images', payload);
+            console.log(`sendBeacon result: ${success}`);
+        } else {
+            // Fallback to fetch with keepalive
+            await fetch('/cleanup-images', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: payload,
+                keepalive: true
+            });
+        }
+    } catch (error) {
+        console.error('Cleanup request failed:', error);
+    }
+}
+
+// Multiple cleanup triggers for maximum reliability
+window.addEventListener('beforeunload', function(e) {
+    executeCleanup('beforeunload');
+});
+
+window.addEventListener('unload', function(e) {
+    executeCleanup('unload');
+});
+
+// Page visibility API - more reliable than beforeunload
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden && !cleanupExecuted) {
+        executeCleanup('page_hidden');
+    }
+});
+
+// Detect browser back/forward navigation
+window.addEventListener('popstate', function(e) {
+    executeCleanup('navigation_back');
+});
+
+// Detect navigation away from current page
+let navigationStarted = false;
+window.addEventListener('beforeunload', function(e) {
+    navigationStarted = true;
+});
+
+// Catch link clicks that navigate away from diet charts
+document.addEventListener('click', function(e) {
+    const link = e.target.closest('a');
+    if (link && link.href && !link.href.includes('#')) {
+        const url = new URL(link.href, window.location.origin);
+        const currentPath = window.location.pathname;
+        
+        // If navigating away from diet charts page
+        if (currentPath.includes('diet') && !url.pathname.includes('diet')) {
+            executeCleanup('link_navigation');
+        }
+    }
+});
+
+// Focus/blur detection as additional safety net
+let tabBlurred = false;
+window.addEventListener('blur', function() {
+    tabBlurred = true;
+    setTimeout(function() {
+        if (tabBlurred && !cleanupExecuted) {
+            executeCleanup('tab_blur_timeout');
+        }
+    }, 20000); // 20 seconds after tab loses focus
+});
+
+window.addEventListener('focus', function() {
+    tabBlurred = false;
+});
+
+// ===== EXISTING FUNCTIONALITY =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize cleanup session first
+    initializeCleanupSession();
+    
+    // Image tooltip functionality
+    const tooltip = document.getElementById('food-image-tooltip');
+    const tooltipImage = document.getElementById('tooltip-image');
+    const tooltipLoading = document.getElementById('tooltip-loading');
+    const tooltipError = document.getElementById('tooltip-error');
+    const foodItems = document.querySelectorAll('.food-item-card');
+    const imageLoadingStatus = document.getElementById('imageLoadingStatus');
+    
+    // Cache for loaded images
+    const imageCache = new Map();
+    let totalImages = 0;
+    let loadedImages = 0;
+    
+    // Get unique food names for tracking
+    const uniqueFoodNames = new Set();
+    foodItems.forEach(item => {
+        const foodName = item.getAttribute('data-food-name');
+        if (foodName) uniqueFoodNames.add(foodName);
+    });
+    totalImages = uniqueFoodNames.size;
+    
+    console.log(`Total unique food items to load: ${totalImages}`);
+    console.log(`Food items: ${Array.from(uniqueFoodNames)}`);
+    
+    function updateImageStatus(foodName, status) {
+        const statusElements = document.querySelectorAll(`.image-status[data-food="${foodName}"]`);
+        statusElements.forEach(element => {
+            element.classList.remove('ready', 'error');
+            if (status === 'ready') {
+                element.innerHTML = '<i class="fas fa-check"></i>';
+                element.classList.add('ready');
+                element.title = 'Image ready';
+            } else if (status === 'error') {
+                element.innerHTML = '<i class="fas fa-times"></i>';
+                element.classList.add('error');
+                element.title = 'Image unavailable';
+            } else {
+                element.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                element.title = 'Loading image...';
+            }
+        });
+    }
+    
+    function updateOverallStatus() {
+        if (loadedImages >= totalImages) {
+            imageLoadingStatus.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>All food images loaded! Hover over food items to view images.</span>
+                </div>
+            `;
+            imageLoadingStatus.classList.remove('alert-info');
+            imageLoadingStatus.classList.add('alert-success');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                imageLoadingStatus.style.display = 'none';
+            }, 5000);
+        } else {
+            imageLoadingStatus.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-download me-2"></i>
+                    <span>Loading food images... (${loadedImages}/${totalImages})</span>
+                    <div class="progress ms-3" style="width: 200px; height: 20px;">
+                        <div class="progress-bar" role="progressbar" style="width: ${(loadedImages/totalImages*100)}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    function downloadFoodImage(foodName) {
+        return new Promise((resolve, reject) => {
+            console.log(`Downloading image for: ${foodName}`);
+            
+            fetch(`/get-food-image/${encodeURIComponent(foodName)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(`Image response for ${foodName}:`, data);
+                    
+                    if (data.status === 'ready' && data.image_path) {
+                        // Pre-load the image to ensure it's cached
+                        const img = new Image();
+                        img.onload = function() {
+                            imageCache.set(foodName, {
+                                status: 'ready',
+                                image_path: data.image_path,
+                                preloaded: true
+                            });
+                            updateImageStatus(foodName, 'ready');
+                            loadedImages++;
+                            updateOverallStatus();
+                            resolve(data);
+                        };
+                        img.onerror = function() {
+                            console.error(`Failed to pre-load image: ${data.image_path}`);
+                            imageCache.set(foodName, { status: 'error' });
+                            updateImageStatus(foodName, 'error');
+                            loadedImages++;
+                            updateOverallStatus();
+                            reject(new Error('Image load failed'));
+                        };
+                        img.src = data.image_path;
+                    } else if (data.status === 'loading') {
+                        // Retry after delay
+                        setTimeout(() => {
+                            downloadFoodImage(foodName).then(resolve).catch(reject);
+                        }, 3000);
+                    } else {
+                        imageCache.set(foodName, { status: 'error' });
+                        updateImageStatus(foodName, 'error');
+                        loadedImages++;
+                        updateOverallStatus();
+                        reject(new Error('Image not available'));
+                    }
+                })
+                .catch(error => {
+                    console.error(`Error downloading image for ${foodName}:`, error);
+                    imageCache.set(foodName, { status: 'error' });
+                    updateImageStatus(foodName, 'error');
+                    loadedImages++;
+                    updateOverallStatus();
+                    reject(error);
+                });
+        });
+    }
+    
+    function showTooltip(e, foodName) {
+        tooltip.style.display = 'block';
+        
+        // Position tooltip
+        positionTooltip(e);
+        
+        // Check cache
+        if (imageCache.has(foodName)) {
+            const cachedData = imageCache.get(foodName);
+            if (cachedData.status === 'ready' && cachedData.image_path) {
+                // Image is ready, show it immediately
+                tooltipLoading.style.display = 'none';
+                tooltipError.style.display = 'none';
+                tooltipImage.src = cachedData.image_path;
+                tooltipImage.alt = foodName;
+                tooltipImage.style.display = 'block';
+            } else {
+                // Image failed to load or not available
+                showErrorState();
+            }
+        } else {
+            // Image not yet downloaded (shouldn't happen if auto-download works)
+            showLoadingState();
+        }
+    }
+    
+    function positionTooltip(e) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        
+        let left = rect.left + rect.width / 2 - 150; // Center tooltip (300px width / 2)
+        let top = rect.top - tooltipRect.height - 10;
+        
+        // Adjust if tooltip goes off screen
+        if (left < 10) left = 10;
+        if (left + 300 > window.innerWidth - 10) {
+            left = window.innerWidth - 300 - 10;
+        }
+        if (top < 10) {
+            top = rect.bottom + 10;
+        }
+        
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
+    }
+    
+    function showLoadingState() {
+        tooltipLoading.style.display = 'block';
+        tooltipImage.style.display = 'none';
+        tooltipError.style.display = 'none';
+    }
+    
+    function showErrorState() {
+        tooltipLoading.style.display = 'none';
+        tooltipImage.style.display = 'none';
+        tooltipError.style.display = 'block';
+    }
+    
+    function hideTooltip() {
+        tooltip.style.display = 'none';
+    }
+    
+    // Add event listeners to food items for tooltip display only
+    foodItems.forEach(item => {
+        const foodName = item.getAttribute('data-food-name');
+        if (!foodName) return;
+        
+        item.addEventListener('mouseenter', (e) => {
+            showTooltip(e, foodName);
+        });
+        
+        item.addEventListener('mouseleave', hideTooltip);
+        
+        item.addEventListener('mousemove', (e) => {
+            if (tooltip.style.display === 'block') {
+                positionTooltip(e);
+            }
+        });
+    });
+    
+    // Hide tooltip when scrolling
+    window.addEventListener('scroll', hideTooltip);
+    
+    // Start automatic download of all images immediately
+    console.log('Starting automatic image downloads...');
+    updateOverallStatus(); // Show initial status
+    
+    // Download images in batches to avoid overwhelming the server
+    const batchSize = 3; // Download 3 images at a time
+    const uniqueFoodNamesArray = Array.from(uniqueFoodNames);
+    
+    async function downloadImagesInBatches() {
+        for (let i = 0; i < uniqueFoodNamesArray.length; i += batchSize) {
+            const batch = uniqueFoodNamesArray.slice(i, i + batchSize);
+            
+            // Download current batch in parallel
+            const promises = batch.map(foodName => 
+                downloadFoodImage(foodName).catch(error => {
+                    console.error(`Failed to download ${foodName}:`, error);
+                })
+            );
+            
+            await Promise.allSettled(promises);
+            
+            // Small delay between batches to be nice to the server
+            if (i + batchSize < uniqueFoodNamesArray.length) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+    }
+    
+    // Start the download process after a short delay to let the page settle
+    setTimeout(() => {
+        downloadImagesInBatches();
+    }, 10);
+    
+    // Enhanced navigation button handling
+    const navButtons = document.querySelectorAll('a[href*="predict"], a[href*="diet-plan"], a[href="/"], a[href*="new-prediction"]');
+    navButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!cleanupExecuted) {
+                // Don't prevent default, just trigger cleanup
+                executeCleanup('button_navigation');
+            }
+        });
+    });
+    
+    // Existing animation code
+    // Animate progress bars
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach((bar, index) => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, index * 200 + 500);
+    });
+    
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.card:not(.border-0)');
+    cards.forEach(card => {
+        if (!card.classList.contains('food-item-card')) {
+            card.classList.add('card-hover');
+        }
+    });
+    
+    // Animate counters
+    const counters = document.querySelectorAll('.display-6, .h5');
+    counters.forEach(counter => {
+        const target = parseInt(counter.textContent);
+        if (!isNaN(target)) {
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                counter.textContent = Math.round(current);
+            }, 20);
+        }
+    });
+    
+    // Add fade-in animation
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    // Observe all cards for animation
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+    });
+});
+
+// Global cleanup function for debugging
+window.forceCleanup = function() {
+    executeCleanup('manual_debug');
+};
+
+console.log('Diet chart cleanup system initialized');
+</script>
+{% endblock %}
