@@ -240,8 +240,8 @@ Systematic hyperparameter validation ensuring optimal model configuration:
 
 ### **Step 1: Clone Repository**
 ```bash
-git clone https://github.com/P-Rawani001/Heart_disease_prediction-with-Personalized-diet-plan
-cd Heart_disease_prediction-with-Personalized-diet-plan
+git clone https://github.com/Soumen633/Heart-DiseasePrediction-With-Personalized-Diet-Plan
+cd Heart-DiseasePrediction-With-Personalized-Diet-Plan
 ```
 
 ### **Step 2: Create Virtual Environment** *(Recommended)*
