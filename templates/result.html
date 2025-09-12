@@ -19,87 +19,72 @@
         overflow: hidden;
     }
     
-  .health-metric-card {
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 15px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    transition: all 0.4s ease;
-    cursor: pointer;
-    position: relative;
-    border: 2px solid transparent;
-    min-height: 180px;
-}
+    /* Desktop Health Metric Cards */
+    .health-metric-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.4s ease;
+        cursor: pointer;
+        position: relative;
+        border: 2px solid transparent;
+        min-height: 180px;
+    }
 
-.health-metric-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    border-color: #007bff;
-    background: rgba(255, 255, 255, 1);
-}
+    .health-metric-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        border-color: #007bff;
+        background: rgba(255, 255, 255, 1);
+    }
 
-.health-value-tooltip {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    color: white;
-    padding: 15px;
-    border-radius: 0 0 15px 15px;
-    transform: translateY(100%);
-    opacity: 0;
-    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    z-index: 10;
-    pointer-events: none;
-}
+    .health-value-tooltip {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        padding: 15px;
+        border-radius: 0 0 15px 15px;
+        transform: translateY(100%);
+        opacity: 0;
+        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        z-index: 10;
+        pointer-events: none;
+    }
 
-.health-metric-card:hover .health-value-tooltip {
-    transform: translateY(0);
-    opacity: 1;
-    transition-delay: 0.1s;
-}
+    .health-metric-card:hover .health-value-tooltip {
+        transform: translateY(0);
+        opacity: 1;
+        transition-delay: 0.1s;
+    }
 
-.health-metric-card.mobile-active .health-value-tooltip {
-    transform: translateY(0);
-    opacity: 1;
-}
+    .metric-title {
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+        transition: color 0.3s ease;
+    }
 
-.metric-title {
-    font-weight: 600;
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-    color: #2c3e50;
-    transition: color 0.3s ease;
-}
+    .health-metric-card:hover .metric-title {
+        color: #007bff;
+    }
 
-.health-metric-card:hover .metric-title {
-    color: #007bff;
-}
+    .tooltip-value {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
 
-.tooltip-value {
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-.tooltip-description {
-    font-size: 0.95rem;
-    opacity: 0.95;
-    line-height: 1.4;
-}
-
-/* Focus states for keyboard navigation */
-.health-metric-card:focus {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
-}
-
-.health-metric-card:focus .health-value-tooltip {
-    transform: translateY(0);
-    opacity: 1;
-}
+    .tooltip-description {
+        font-size: 0.95rem;
+        opacity: 0.95;
+        line-height: 1.4;
+    }
     
     .metric-icon {
         font-size: 2.5rem;
@@ -111,28 +96,139 @@
         transform: scale(1.1);
     }
     
-    .metric-title {
-        font-weight: 600;
-        font-size: 1.1rem;
-        margin-bottom: 0.5rem;
-        color: #2c3e50;
-    }
-    
     .metric-subtitle {
         color: #7f8c8d;
         font-size: 0.9rem;
         margin-bottom: 0;
     }
-    
-    .tooltip-value {
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
+
+    /* Mobile-specific styles */
+    @media (max-width: 768px) {
+        .health-metric-card {
+            min-height: auto;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            cursor: default;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .health-metric-card:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .health-metric-card:hover .metric-icon {
+            transform: none;
+        }
+
+        .metric-title {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+            color: #2c3e50;
+        }
+
+        .health-metric-card:hover .metric-title {
+            color: #2c3e50;
+        }
+
+        .metric-subtitle {
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Mobile tooltip as static content */
+        .health-value-tooltip {
+            position: static;
+            transform: none;
+            opacity: 1;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            color: #495057;
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            border-left: 4px solid #007bff;
+            pointer-events: auto;
+            transition: none;
+        }
+
+        .tooltip-value {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: #007bff;
+            text-shadow: none;
+        }
+
+        .tooltip-description {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            line-height: 1.3;
+            color: #6c757d;
+        }
+
+        /* Reduce grid spacing on mobile */
+        .row.health-metrics {
+            margin: 0 -5px;
+        }
+
+        .row.health-metrics > [class*="col-"] {
+            padding: 0 5px;
+        }
     }
-    
-    .tooltip-description {
-        font-size: 0.9rem;
-        opacity: 0.9;
+
+    /* Extra small screens */
+    @media (max-width: 576px) {
+        .health-metric-card {
+            padding: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .metric-icon {
+            font-size: 1.8rem;
+        }
+
+        .metric-title {
+            font-size: 0.95rem;
+        }
+
+        .metric-subtitle {
+            font-size: 0.75rem;
+        }
+
+        .health-value-tooltip {
+            padding: 0.6rem;
+            margin-top: 0.3rem;
+        }
+
+        .tooltip-value {
+            font-size: 0.9rem;
+        }
+
+        .tooltip-description {
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Focus states for keyboard navigation - desktop only */
+    @media (min-width: 769px) {
+        .health-metric-card:focus {
+            outline: 2px solid #007bff;
+            outline-offset: 2px;
+        }
+
+        .health-metric-card:focus .health-value-tooltip {
+            transform: translateY(0);
+            opacity: 1;
+        }
     }
     
     .risk-indicator {
@@ -238,6 +334,23 @@
             transform: translateY(0);
         }
     }
+
+    /* Mobile button adjustments */
+    @media (max-width: 768px) {
+        .action-buttons {
+            margin-top: 1.5rem;
+        }
+
+        .btn-custom {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .recommendations-section {
+            padding: 1.5rem;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -295,10 +408,11 @@
                             <i class="fas fa-clipboard-list me-2"></i>
                             Your Health Data Summary
                         </h4>
-                        <p class="text-muted">Hover over each metric to see your entered values</p>
+                        <p class="text-muted d-none d-md-block">Hover over each metric to see your entered values</p>
+                        <p class="text-muted d-md-none">Your health metrics with detailed information</p>
                     </div>
                     
-                    <div class="row">
+                    <div class="row health-metrics">
                         <!-- Age -->
                         <div class="col-md-3 col-sm-6 mb-3">
                             <div class="health-metric-card" tabindex="0">
@@ -572,82 +686,50 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     }
     
-    // Add staggered animation to health metric cards
-    const metricCards = document.querySelectorAll('.health-metric-card');
-    metricCards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.1}s`;
-        card.classList.add('slide-in');
-    });
-    
-    // Enhanced tooltip interactions
-   // Enhanced tooltip interactions
-metricCards.forEach(card => {
-    let tooltipTimeout;
-    
-    // Mouse events for desktop
-    card.addEventListener('mouseenter', function() {
-        clearTimeout(tooltipTimeout);
-        this.style.zIndex = '20';
-    });
-    
-    card.addEventListener('mouseleave', function() {
-        tooltipTimeout = setTimeout(() => {
-            this.style.zIndex = '1';
-        }, 300);
-    });
-    
-    // Touch events for mobile
-    card.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        
-        // Remove active state from all cards
-        metricCards.forEach(otherCard => {
-            if (otherCard !== card) {
-                otherCard.classList.remove('mobile-active');
-                otherCard.style.zIndex = '1';
-            }
+    // Add staggered animation to health metric cards (desktop only)
+    if (window.innerWidth > 768) {
+        const metricCards = document.querySelectorAll('.health-metric-card');
+        metricCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('slide-in');
         });
         
-        // Toggle current card
-        const isActive = this.classList.contains('mobile-active');
-        if (isActive) {
-            this.classList.remove('mobile-active');
-            this.style.zIndex = '1';
-        } else {
-            this.classList.add('mobile-active');
-            this.style.zIndex = '20';
-        }
-    });
-    
-    // Keyboard support
-    card.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            this.click();
-        }
-    });
-    
-    // Focus events
-    card.addEventListener('focus', function() {
-        this.style.zIndex = '20';
-    });
-    
-    card.addEventListener('blur', function() {
-        setTimeout(() => {
-            this.style.zIndex = '1';
-        }, 300);
-    });
-});
-
-// Close tooltips when clicking outside
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.health-metric-card')) {
+        // Enhanced tooltip interactions for desktop
         metricCards.forEach(card => {
-            card.classList.remove('mobile-active');
-            card.style.zIndex = '1';
+            let tooltipTimeout;
+            
+            // Mouse events for desktop
+            card.addEventListener('mouseenter', function() {
+                clearTimeout(tooltipTimeout);
+                this.style.zIndex = '20';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                tooltipTimeout = setTimeout(() => {
+                    this.style.zIndex = '1';
+                }, 300);
+            });
+            
+            // Keyboard support
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.focus();
+                }
+            });
+            
+            // Focus events
+            card.addEventListener('focus', function() {
+                this.style.zIndex = '20';
+            });
+            
+            card.addEventListener('blur', function() {
+                setTimeout(() => {
+                    this.style.zIndex = '1';
+                }, 300);
+            });
         });
     }
-});
     
     // Print functionality
     window.printResults = function() {
@@ -668,24 +750,6 @@ document.addEventListener('click', function(e) {
 </script>
 
 <style>
-@media (max-width: 768px) {
-    .health-metric-card.mobile-tooltip-active .health-value-tooltip {
-        transform: translateY(0);
-        opacity: 1;
-    }
-    
-    .health-metric-card .health-value-tooltip {
-        position: relative;
-        top: auto;
-        left: auto;
-        right: auto;
-        transform: translateY(-10px);
-        opacity: 0;
-        margin-top: 15px;
-        border-radius: 10px;
-    }
-}
-
 @media print {
     .btn, .action-buttons {
         display: none !important;
