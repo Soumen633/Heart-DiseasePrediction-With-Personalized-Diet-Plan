@@ -106,7 +106,7 @@ import os
         ##etra end
 
 # Start the keep-alive thread
-threading.Thread(target=keep_alive, daemon=True).start()
+# threading.Thread(target=keep_alive, daemon=True).start()
 
 
 def crawl_food_image(food_name, max_retries=3):
