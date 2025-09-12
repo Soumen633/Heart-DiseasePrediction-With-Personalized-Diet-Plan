@@ -90,6 +90,24 @@ os.makedirs("templates", exist_ok=True)
 # Global variable to track crawling status
 crawling_status = {}
 
+import threading
+import time
+import requests
+import os
+##extra fxn 
+def keep_alive():
+    while True:
+        try:
+            url = os.getenv('RENDER_EXTERNAL_URL', 'https://carepulse-zdn2.onrender.com')
+            requests.get(url)
+        except:
+            pass
+        time.sleep(30)  # 10 minutes
+        ##etra end
+
+# Start the keep-alive thread
+threading.Thread(target=keep_alive, daemon=True).start()
+
 
 def crawl_food_image(food_name, max_retries=3):
     """Crawl a single food image using Bing image crawler"""
