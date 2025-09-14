@@ -341,34 +341,39 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
-                            <i class="fas fa-home me-1"></i>Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'predict' %}active{% endif %}" href="{{ url_for('predict') }}">
-                            <i class="fas fa-stethoscope me-1"></i>Predict
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'diet_plan_page' %}active{% endif %}" href="{{ url_for('diet_plan_page') }}">
-                            <i class="fas fa-utensils me-1"></i>Diet Plan
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="{{ url_for('about') }}">
-                            <i class="fas fa-info-circle me-1"></i>About
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'contact' %}active{% endif %}" href="{{ url_for('contact') }}">
-                            <i class="fas fa-envelope me-1"></i>Contact
-                        </a>
-                    </li>
-                </ul>
-            </div>
+    <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
+                <i class="fas fa-home me-1"></i>Home
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'predict' %}active{% endif %}" href="{{ url_for('predict') }}">
+                <i class="fas fa-stethoscope me-1"></i>Predict
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'diet_plan_page' %}active{% endif %}" href="{{ url_for('diet_plan_page') }}">
+                <i class="fas fa-utensils me-1"></i>Diet Plan
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'model_statistics' %}active{% endif %}" href="{{ url_for('model_statistics') }}">
+                <i class="fas fa-chart-line me-1"></i>Model Stats
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="{{ url_for('about') }}">
+                <i class="fas fa-info-circle me-1"></i>About
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'contact' %}active{% endif %}" href="{{ url_for('contact') }}">
+                <i class="fas fa-envelope me-1"></i>Contact
+            </a>
+        </li>
+    </ul>
+</div>
         </div>
     </nav>
 
