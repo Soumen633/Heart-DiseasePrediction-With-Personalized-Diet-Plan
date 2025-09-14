@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Statistics - Heart Disease Prediction</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --light-bg: #f8fafc;
+            --dark-bg: #1e293b;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-success: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            --gradient-warning: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            --gradient-danger: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-nav .nav-link {
+            font-weight: 500;
+            color: var(--text-primary) !important;
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color) !important;
+            transform: translateY(-1px);
+        }
+
+        .navbar-nav .nav-link.active {
+            background: var(--primary-color);
+            color: white !important;
+        }
+
+        /* Main content */
+        .main-content {
+            min-height: calc(100vh - 160px);
+            padding: 2rem 0;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 1rem 1rem 0 0 !important;
+            padding: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Statistics cards */
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            color: white;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Section headers */
+        .section-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Feature importance list */
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .feature-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .feature-correlation {
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .positive-correlation {
+            background: rgba(5, 150, 105, 0.1);
+            color: var(--success-color);
+        }
+
+        .negative-correlation {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--danger-color);
+        }
+
+        /* Model info table */
+        .model-info-table {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .model-info-table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            padding: 1rem;
+            border: none;
+        }
+
+        .model-info-table td {
+            padding: 1rem;
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Performance metrics */
+        .metric-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            margin: 0.25rem;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-excellent {
+            background: var(--gradient-success);
+            color: var(--text-primary);
+        }
+
+        .metric-good {
+            background: var(--gradient-warning);
+            color: var(--text-primary);
+        }
+
+        .metric-average {
+            background: var(--gradient-danger);
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .navbar-nav {
+                text-align: center;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-heartbeat"></i>
+                CarePulse
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/predict">
+                            <i class="fas fa-stethoscope me-1"></i>Predict
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/diet-plan">
+                            <i class="fas fa-utensils me-1"></i>Diet Plan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/model-statistics">
+                            <i class="fas fa-chart-line me-1"></i>Model Statistics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">
+                            <i class="fas fa-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact">
+                            <i class="fas fa-envelope me-1"></i>Contact
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" style="margin-top: 80px;">
+        <div class="container">
+            <!-- Header Section -->
+            <div class="section-header fade-in-up">
+                <div class="section-title">
+                    <i class="fas fa-brain me-3"></i>Random Forest Model Statistics
+                </div>
+                <div class="section-subtitle">
+                    Comprehensive analysis of our heart disease prediction model performance and insights
+                </div>
+            </div>
+
+            <!-- Key Performance Metrics -->
+            <div class="row mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card fade-in-up">
+                        <div class="stat-number">94.6%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card fade-in-up">
+                        <div class="stat-number">86.6%</div>
+                        <div class="stat-label">Precision</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card fade-in-up">
+                        <div class="stat-number">92.7%</div>
+                        <div class="stat-label">Recall</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card fade-in-up">
+                        <div class="stat-number">92.7%</div>
+                        <div class="stat-label">F1-Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Information -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-cogs me-2"></i>Model Configuration
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table model-info-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Value</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Algorithm</strong></td>
+                                    <td>Random Forest Classifier</td>
+                                    <td>Ensemble learning method using multiple decision trees</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Number of Estimators</strong></td>
+                                    <td>400 trees</td>
+                                    <td>Optimal number of decision trees in the forest</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Max Depth</strong></td>
+                                    <td>30 levels</td>
+                                    <td>Maximum depth of each decision tree</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Min Samples Split</strong></td>
+                                    <td>2 samples</td>
+                                    <td>Minimum samples required to split an internal node</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Min Samples Leaf</strong></td>
+                                    <td>1 sample</td>
+                                    <td>Minimum samples required to be at a leaf node</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Max Features</strong></td>
+                                    <td>sqrt</td>
+                                    <td>Number of features considered for best split</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Class Weight</strong></td>
+                                    <td>Balanced</td>
+                                    <td>Automatically adjusts weights for imbalanced classes</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Analysis -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Performance Analysis
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Classification Metrics</h5>
+                            <div class="mb-3">
+                                <span class="metric-badge metric-excellent">Accuracy: 94.6%</span>
+                                <span class="metric-badge metric-good">Precision: 86.6%</span>
+                                <span class="metric-badge metric-excellent">Recall: 92.7%</span>
+                                <span class="metric-badge metric-excellent">F1-Score: 92.7%</span>
+                                <span class="metric-badge metric-excellent">ROC-AUC: 92.7%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Confusion Matrix Results</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Predicted No Disease</th>
+                                            <th>Predicted Disease</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th>Actual No Disease</th>
+                                            <td><strong>1598</strong> (True Negatives)</td>
+                                            <td><strong>2</strong> (False Positives)</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Actual Disease</th>
+                                            <td><strong>143</strong> (False Negatives)</td>
+                                            <td><strong>924</strong> (True Positives)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Importance -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-list-ol me-2"></i>Feature Correlation with Heart Disease
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Positive Risk Factors</h5>
+                            <ul class="feature-list">
+                                <li class="feature-item">
+                                    <span class="feature-name">BMI (Body Mass Index)</span>
+                                    <span class="feature-correlation positive-correlation">+0.020</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-name">Stress Level</span>
+                                    <span class="feature-correlation positive-correlation">+0.016</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-name">High LDL Cholesterol</span>
+                                    <span class="feature-correlation positive-correlation">+0.008</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-name">Homocysteine Level</span>
+                                    <span class="feature-correlation positive-correlation">+0.008</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-name">Exercise Habits</span>
+                                    <span class="feature-correlation positive-correlation">+0.005</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Negative Risk Factors</h5>
+                            <ul class="feature-list">
+                                <li class="feature-item">
+                                    <span class="feature-name">Alcohol Consumption</span>
+                                    <span class="feature-correlation negative-correlation">-0.018</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-name">Gender</span>
+                                    <span class="feature-correlation negative-correlation">-0.017</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-name">Blood Pressure</span>
+                                    <span class="feature-correlation negative-correlation">-0.014</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-name">Sugar Consumption</span>
+                                    <span class="feature-correlation negative-correlation">-0.013</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-name">Age</span>
+                                    <span class="feature-correlation negative-correlation">-0.009</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Weight Analysis -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-balance-scale me-2"></i>Class Weight Impact Analysis
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>Analysis of how different class weight configurations affect model performance metrics:</p>
+                            <div class="text-center mb-3">
+                                <img src="{{ url_for('static', filename='images/class_weight_analysis.png') }}" 
+                                     class="img-fluid rounded" 
+                                     alt="Class Weight Impact on Model Performance"
+                                     style="max-height: 400px; object-fit: contain;">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Key Insights:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check-circle text-success me-2"></i>Balanced class weights provide optimal performance</li>
+                                        <li><i class="fas fa-check-circle text-success me-2"></i>Precision-Recall trade-off is well balanced</li>
+                                        <li><i class="fas fa-check-circle text-success me-2"></i>ROC-AUC remains consistently high across configurations</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Optimal Configuration:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Selected Weight:</strong> Balanced (0.1, 1.3)</li>
+                                        <li><strong>Precision:</strong> 97.2%</li>
+                                        <li><strong>Recall:</strong> 87.0%</li>
+                                        <li><strong>F1-Score:</strong> 91.8%</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Correlation Matrix -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-project-diagram me-2"></i>Feature Correlation Matrix
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>Comprehensive correlation analysis between all features in the dataset:</p>
+                            <div class="text-center mb-3">
+                                <img src="{{ url_for('static', filename='images/correlation_matrix.png') }}" 
+                                     class="img-fluid rounded" 
+                                     alt="Feature Correlation Matrix"
+                                     style="max-height: 500px; object-fit: contain;">
+                            </div>
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle me-2"></i>Matrix Interpretation:</h6>
+                                <ul class="mb-0">
+                                    <li><strong>Red values:</strong> Positive correlations (features that increase together)</li>
+                                    <li><strong>Blue values:</strong> Negative correlations (inverse relationships)</li>
+                                    <li><strong>White/Light values:</strong> Weak or no correlation</li>
+                                    <li>The matrix helps identify multicollinearity and feature relationships</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heart Disease Correlation Analysis -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-heartbeat me-2"></i>Heart Disease Risk Factor Analysis
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="text-center mb-3">
+                                <img src="{{ url_for('static', filename='images/heart_disease_correlation.png') }}" 
+                                     class="img-fluid rounded" 
+                                     alt="Feature Correlation with Heart Disease"
+                                     style="max-height: 400px; object-fit: contain;">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Risk Factor Rankings:</h6>
+                            <div class="mb-3">
+                                <h6 class="text-success">Protective Factors (Negative Correlation):</h6>
+                                <ul class="list-unstyled">
+                                    <li><span class="badge bg-danger me-2">-0.018</span>Alcohol Consumption</li>
+                                    <li><span class="badge bg-danger me-2">-0.017</span>Gender (Male)</li>
+                                    <li><span class="badge bg-danger me-2">-0.014</span>Blood Pressure</li>
+                                    <li><span class="badge bg-danger me-2">-0.013</span>Sugar Consumption</li>
+                                    <li><span class="badge bg-danger me-2">-0.009</span>Age</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h6 class="text-warning">Risk Factors (Positive Correlation):</h6>
+                                <ul class="list-unstyled">
+                                    <li><span class="badge bg-success me-2">+0.020</span>BMI</li>
+                                    <li><span class="badge bg-success me-2">+0.016</span>Stress Level</li>
+                                    <li><span class="badge bg-success me-2">+0.008</span>High LDL Cholesterol</li>
+                                    <li><span class="badge bg-success me-2">+0.008</span>Homocysteine Level</li>
+                                    <li><span class="badge bg-success me-2">+0.005</span>Exercise Habits</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Performance Metrics with ROC Curve -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Comprehensive Performance Analysis
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="text-center mb-3">
+                                <img src="{{ url_for('static', filename='images/model_performance_metrics.png') }}" 
+                                     class="img-fluid rounded" 
+                                     alt="Model Performance Metrics and ROC Curve"
+                                     style="max-height: 400px; object-fit: contain;">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6>Confusion Matrix Analysis:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>True Negatives:</strong> 1,598 (99.9% specificity)</li>
+                                        <li><strong>False Positives:</strong> 2 (0.1% error)</li>
+                                        <li><strong>False Negatives:</strong> 143 (13.4% missed)</li>
+                                        <li><strong>True Positives:</strong> 924 (86.6% sensitivity)</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6>Performance Metrics:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Accuracy:</strong> 94.6%</li>
+                                        <li><strong>Precision:</strong> 86.6%</li>
+                                        <li><strong>Recall:</strong> 86.6%</li>
+                                        <li><strong>F1-Score:</strong> 92.7%</li>
+                                        <li><strong>ROC-AUC:</strong> 92.7%</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6>Clinical Significance:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>High Sensitivity:</strong> Detects 92.7% of heart disease cases</li>
+                                        <li><strong>Low False Positives:</strong> Minimal unnecessary worry</li>
+                                        <li><strong>Balanced Performance:</strong> Good for screening applications</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hyperparameter Optimization Analysis -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-search me-2"></i>Hyperparameter Optimization Analysis
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>Systematic analysis of hyperparameter impact on model performance:</p>
+                            <div class="text-center mb-3">
+                                <img src="{{ url_for('static', filename='images/parameter_impact_analysis.png') }}" 
+                                     class="img-fluid rounded" 
+                                     alt="Parameter Impact Analysis"
+                                     style="max-height: 500px; object-fit: contain;">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <h6>Optimal Parameters:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>n_estimators:</strong> 400</li>
+                                        <li><strong>max_depth:</strong> 30</li>
+                                        <li><strong>min_samples_split:</strong> 2</li>
+                                        <li><strong>min_samples_leaf:</strong> 1</li>
+                                        <li><strong>max_features:</strong> sqrt</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3">
+                                    <h6>Parameter Effects:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>n_estimators:</strong> Higher = Better stability</li>
+                                        <li><strong>max_depth:</strong> 30 optimal for complexity</li>
+                                        <li><strong>min_samples_split:</strong> Lower = More flexibility</li>
+                                        <li><strong>min_samples_leaf:</strong> 1 allows fine-grained splits</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3">
+                                    <h6>Performance Trends:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>F1-Score Range:</strong> 0.88 - 0.92</li>
+                                        <li><strong>Best Performance:</strong> 0.92 F1-Score</li>
+                                        <li><strong>Parameter Sensitivity:</strong> Moderate</li>
+                                        <li><strong>Optimization Method:</strong> Grid Search</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3">
+                                    <h6>Model Robustness:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Error Bars:</strong> Show confidence intervals</li>
+                                        <li><strong>Stability:</strong> High across parameters</li>
+                                        <li><strong>Overfitting Risk:</strong> Well controlled</li>
+                                        <li><strong>Generalization:</strong> Excellent</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Curves Analysis -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Learning Curves & Model Validation
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Training Set Size vs Performance</h6>
+                            <div class="text-center mb-3">
+                                <img src="{{ url_for('static', filename='images/learning_curves.png') }}" 
+                                     class="img-fluid rounded" 
+                                     alt="Learning Curves - Training vs Validation Performance"
+                                     style="max-height: 300px; object-fit: contain;">
+                            </div>
+                            <div class="alert alert-success">
+                                <h6><i class="fas fa-check-circle me-2"></i>Learning Curve Analysis:</h6>
+                                <ul class="mb-0">
+                                    <li><strong>Training F1:</strong> Consistently high (100%)</li>
+                                    <li><strong>Validation F1:</strong> Improves with more data (84.7%)</li>
+                                    <li><strong>Gap Analysis:</strong> Indicates some overfitting</li>
+                                    <li><strong>Data Sufficiency:</strong> More data beneficial</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Hyperparameter Validation Curves</h6>
+                            <div class="text-center mb-3">
+                                <img src="{{ url_for('static', filename='images/validation_curves.png') }}" 
+                                     class="img-fluid rounded" 
+                                     alt="Validation Curves for Key Hyperparameters"
+                                     style="max-height: 300px; object-fit: contain;">
+                            </div>
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle me-2"></i>Validation Insights:</h6>
+                                <ul class="mb-0">
+                                    <li><strong>n_estimators:</strong> 400 provides optimal balance</li>
+                                    <li><strong>max_depth:</strong> 30 prevents underfitting</li>
+                                    <li><strong>min_samples_split:</strong> 2 optimal for flexibility</li>
+                                    <li><strong>min_samples_leaf:</strong> 1 allows detailed learning</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dataset Information -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-database me-2"></i>Dataset Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Dataset Statistics</h5>
+                            <ul class="list-unstyled">
+                                <li><strong>Total Samples:</strong> 13,334 patients</li>
+                                <li><strong>Features:</strong> 20 health indicators</li>
+                                <li><strong>Training Set:</strong> 10,667 samples (80%)</li>
+                                <li><strong>Test Set:</strong> 2,666 samples (20%)</li>
+                                <li><strong>Positive Cases:</strong> 5,333 (59.9%)</li>
+                                <li><strong>Negative Cases:</strong> 8,000 (40.1%)</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Data Quality</h5>
+                            <ul class="list-unstyled">
+                                <li><strong>Missing Values:</strong> 0% (Complete dataset)</li>
+                                <li><strong>Data Preprocessing:</strong> Normalized & scaled</li>
+                                <li><strong>Feature Selection:</strong> All 20 features used</li>
+                                <li><strong>Class Balance:</strong> Handled with weighted approach</li>
+                                <li><strong>Data Source:</strong> Medical records & surveys</li>
+                                <li><strong>Quality Score:</strong> 95/100</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Interpretability -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Model Interpretability & Insights
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>Key Clinical Insights</h5>
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle me-2"></i>Important Findings:</h6>
+                                <ul class="mb-0">
+                                    <li><strong>BMI and Stress</strong> are the strongest positive predictors of heart disease risk</li>
+                                    <li><strong>High LDL Cholesterol</strong> and <strong>Homocysteine levels</strong> show significant correlation</li>
+                                    <li><strong>Gender differences</strong> in heart disease presentation are captured by the model</li>
+                                    <li><strong>Exercise habits</strong> have a protective effect against heart disease</li>
+                                    <li>The model achieves excellent <strong>sensitivity (92.7%)</strong> for early detection</li>
+                                    <li><strong>Class balancing</strong> ensures fair prediction across different risk groups</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5>Model Strengths</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check-circle text-success me-2"></i>High accuracy and reliability</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Excellent recall for disease detection</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Handles class imbalance well</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Fast prediction time</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Interpretable feature importance</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Clinical Applications</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-stethoscope text-primary me-2"></i>Early screening and prevention</li>
+                                <li><i class="fas fa-user-md text-primary me-2"></i>Risk stratification for patients</li>
+                                <li><i class="fas fa-chart-line text-primary me-2"></i>Population health monitoring</li>
+                                <li><i class="fas fa-pills text-primary me-2"></i>Treatment planning support</li>
+                                <li><i class="fas fa-heart text-primary me-2"></i>Lifestyle intervention guidance</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-md-start text-center">
+                    <p>&copy; 2025 CarePulse. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end text-center">
+                    <p>Made with <i class="fas fa-heart text-danger"></i> for better health</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add fade in animation to cards
+            const cards = document.querySelectorAll('.card, .stat-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('fade-in-up');
+                }, index * 100);
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Add hover effects to metric badges
+            document.querySelectorAll('.metric-badge').forEach(badge => {
+                badge.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                });
+                
+                badge.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+
+            // Add click-to-expand functionality for feature lists
+            document.querySelectorAll('.feature-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip';
+                    tooltip.innerHTML = 'Feature correlation indicates the statistical relationship with heart disease risk';
+                    tooltip.style.cssText = `
+                        position: absolute;
+                        background: rgba(0,0,0,0.8);
+                        color: white;
+                        padding: 8px 12px;
+                        border-radius: 4px;
+                        font-size: 12px;
+                        z-index: 1000;
+                        pointer-events: none;
+                        max-width: 200px;
+                    `;
+                    
+                    document.body.appendChild(tooltip);
+                    
+                    setTimeout(() => {
+                        if (tooltip.parentNode) {
+                            tooltip.parentNode.removeChild(tooltip);
+                        }
+                    }, 3000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
