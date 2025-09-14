@@ -153,6 +153,7 @@ This comprehensive **Heart Disease Prediction System** combines state-of-the-art
 │   ├── 🏗️ base.html                  # Base template
 │   ├── 📞 contact.html               # Contact page
 │   ├── 📊 diet_charts.html           # Diet charts display
+│   ├── 📊 model_statistics.html      # Brief description about model's Performance
 │   ├── 🍎 diet_plan.html             # Individual diet plan view
 │   ├── 🏠 index.html                 # Homepage
 │   ├── 🔮 predict.html               # Prediction input form (20 features)
