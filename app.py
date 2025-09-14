@@ -434,8 +434,8 @@ def model_statistics_detailed():
     # Model performance metrics (replace with actual values from your model)
     performance_metrics = {
         'accuracy': 0.946,
-        'precision': 0.866,
-        'recall': 0.927,
+        'precision': 0.997,
+        'recall': 0.866,
         'f1_score': 0.927,
         'roc_auc': 0.927
     }
