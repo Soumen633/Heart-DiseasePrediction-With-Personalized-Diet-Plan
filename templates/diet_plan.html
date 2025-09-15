@@ -71,16 +71,53 @@
                                            id="vegetarian" value="vegetarian" checked>
                                     <label class="form-check-label" for="vegetarian">
                                         <i class="fas fa-seedling text-success me-2"></i>
-                                        Vegetarian
+                                        Vegetarian Only
                                     </label>
+                                    <small class="d-block text-muted ms-4">Plant-based meals only</small>
                                 </div>
-                                <div class="form-check form-check-inline d-block">
+                                <div class="form-check form-check-inline d-block mb-2">
                                     <input class="form-check-input" type="radio" name="diet_type" 
                                            id="non_vegetarian" value="non_vegetarian">
                                     <label class="form-check-label" for="non_vegetarian">
                                         <i class="fas fa-drumstick-bite text-warning me-2"></i>
-                                        Non-Vegetarian
+                                        Non-Vegetarian Only
                                     </label>
+                                    <small class="d-block text-muted ms-4">Meat and poultry focused</small>
+                                </div>
+                                <div class="form-check form-check-inline d-block">
+                                    <input class="form-check-input" type="radio" name="diet_type" 
+                                           id="hybrid" value="hybrid">
+                                    <label class="form-check-label" for="hybrid">
+                                        <i class="fas fa-balance-scale text-info me-2"></i>
+                                        Hybrid Diet
+                                    </label>
+                                    <small class="d-block text-muted ms-4">Mix of vegetarian and non-vegetarian meals</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Hybrid Diet Configuration -->
+                            <div class="col-md-6 mb-4" id="hybridConfig" style="display: none;">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-sliders-h me-2"></i>
+                                    Hybrid Diet Balance
+                                </label>
+                                <div class="mb-3">
+                                    <label for="veg_percentage" class="form-label">
+                                        Vegetarian Meals: <span id="vegPercent">50</span>%
+                                    </label>
+                                    <input type="range" class="form-range" id="veg_percentage" 
+                                           name="veg_percentage" min="20" max="80" value="50">
+                                    <div class="d-flex justify-content-between small text-muted">
+                                        <span>20% Veg</span>
+                                        <span>50% Veg</span>
+                                        <span>80% Veg</span>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info alert-sm">
+                                    <small>
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        <span id="balanceText">Balanced mix of vegetarian and non-vegetarian meals</span>
+                                    </small>
                                 </div>
                             </div>
                             
@@ -257,6 +294,62 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('dietForm');
     const submitBtn = document.getElementById('generateDietBtn');
     const imageCrawlingNotice = document.getElementById('imageCrawlingNotice');
+    const hybridConfig = document.getElementById('hybridConfig');
+    const vegSlider = document.getElementById('veg_percentage');
+    const vegPercentDisplay = document.getElementById('vegPercent');
+    const balanceText = document.getElementById('balanceText');
+    
+    // Show/hide hybrid configuration based on diet type selection
+    const dietTypeRadios = document.querySelectorAll('input[name="diet_type"]');
+    dietTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'hybrid') {
+                hybridConfig.style.display = 'block';
+                hybridConfig.style.animation = 'fadeIn 0.3s ease';
+            } else {
+                hybridConfig.style.display = 'none';
+            }
+            updateImageCrawlingText();
+        });
+    });
+    
+    // Update vegetarian percentage display and balance text
+    vegSlider.addEventListener('input', function() {
+        const vegPercent = this.value;
+        const nonVegPercent = 100 - vegPercent;
+        
+        vegPercentDisplay.textContent = vegPercent;
+        
+        // Update balance text based on percentage
+        if (vegPercent >= 70) {
+            balanceText.innerHTML = `<i class="fas fa-leaf text-success me-1"></i>Mostly vegetarian with occasional non-vegetarian meals (${vegPercent}% veg, ${nonVegPercent}% non-veg)`;
+        } else if (vegPercent >= 60) {
+            balanceText.innerHTML = `<i class="fas fa-seedling text-success me-1"></i>Vegetarian-leaning hybrid diet (${vegPercent}% veg, ${nonVegPercent}% non-veg)`;
+        } else if (vegPercent >= 40) {
+            balanceText.innerHTML = `<i class="fas fa-balance-scale text-info me-1"></i>Balanced mix of vegetarian and non-vegetarian meals (${vegPercent}% veg, ${nonVegPercent}% non-veg)`;
+        } else if (vegPercent >= 30) {
+            balanceText.innerHTML = `<i class="fas fa-drumstick-bite text-warning me-1"></i>Non-vegetarian-leaning hybrid diet (${vegPercent}% veg, ${nonVegPercent}% non-veg)`;
+        } else {
+            balanceText.innerHTML = `<i class="fas fa-meat text-danger me-1"></i>Mostly non-vegetarian with some vegetarian meals (${vegPercent}% veg, ${nonVegPercent}% non-veg)`;
+        }
+    });
+    
+    function updateImageCrawlingText() {
+        const selectedDietType = document.querySelector('input[name="diet_type"]:checked').value;
+        const noticeText = imageCrawlingNotice.querySelector('small');
+        
+        if (noticeText) {
+            let dietDescription;
+            if (selectedDietType === 'hybrid') {
+                dietDescription = 'hybrid (vegetarian and non-vegetarian)';
+            } else if (selectedDietType === 'vegetarian') {
+                dietDescription = 'vegetarian';
+            } else {
+                dietDescription = 'non-vegetarian';
+            }
+            noticeText.textContent = `We're downloading high-quality ${dietDescription} food images from Bing. This will enhance your diet plan experience!`;
+        }
+    }
     
     // Add form validation and enhancement
     form.addEventListener('submit', function(e) {
@@ -272,11 +365,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show enhanced processing message
         const processingAlert = document.createElement('div');
         processingAlert.className = 'alert alert-success mt-3';
+        
+        const selectedDietType = document.querySelector('input[name="diet_type"]:checked').value;
+        let dietTypeText = selectedDietType;
+        if (selectedDietType === 'hybrid') {
+            const vegPercent = document.getElementById('veg_percentage').value;
+            dietTypeText = `hybrid diet (${vegPercent}% vegetarian)`;
+        }
+        
         processingAlert.innerHTML = `
             <div class="d-flex align-items-center">
                 <i class="fas fa-cog fa-spin me-2"></i>
                 <div>
-                    <strong>Creating your personalized diet plan...</strong>
+                    <strong>Creating your personalized ${dietTypeText} plan...</strong>
                     <br><small>• Generating meal combinations based on your risk level</small>
                     <br><small>• Downloading food images from Bing for visual reference</small>
                     <br><small>• Calculating nutritional information</small>
@@ -286,7 +387,6 @@ document.addEventListener('DOMContentLoaded', function() {
         form.appendChild(processingAlert);
         
         // Notify backend to start image crawling immediately
-        // This happens automatically when the form is submitted to /generate-diet
         console.log('Diet generation started - images will begin downloading immediately');
     });
     
@@ -304,14 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 200);
             }
             
-            // Update image crawling notice based on diet type
-            if (this.name === 'diet_type') {
-                const dietType = this.value;
-                const noticeText = imageCrawlingNotice.querySelector('small');
-                if (noticeText) {
-                    noticeText.textContent = `We're downloading high-quality ${dietType} food images from Bing. This will enhance your diet plan experience!`;
-                }
-            }
+            updateImageCrawlingText();
         });
     });
     
@@ -367,6 +460,25 @@ document.addEventListener('DOMContentLoaded', function() {
     if (featuresSection) {
         featuresSection.appendChild(bingImageInfo);
     }
+    
+    // CSS for fade in animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-range::-webkit-slider-thumb {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .form-range::-moz-range-thumb {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+        }
+    `;
+    document.head.appendChild(style);
 });
 </script>
 {% endblock %}
