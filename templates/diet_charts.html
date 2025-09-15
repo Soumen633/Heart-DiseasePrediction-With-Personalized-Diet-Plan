@@ -3,6 +3,13 @@
 {% block title %}Your Diet Charts - CarePulse{% endblock %}
 
 {% block content %}
+<!-- Variable validation and defaults -->
+{% set veg_percentage = veg_percentage|default(50) %}
+{% set diet_type = diet_type|default('vegetarian') %}
+{% if not diet_charts %}
+    {% set diet_charts = [] %}
+{% endif %}
+
 <div class="container">
     <!-- Header Section -->
     <div class="row justify-content-center mb-4">
@@ -12,11 +19,59 @@
                 Your Personalized Diet Charts
             </h2>
             <p class="text-white-50">
-                {{ diet_charts|length }} customized meal plans for your 
-                <span class="badge bg-{{ outcome.risk_color }}">{{ outcome.risk_level }}</span>
+                {% if diet_type == 'hybrid' %}
+                    {{ diet_charts|length }} hybrid diet plans with {{ veg_percentage }}% vegetarian and {{ 100 - veg_percentage }}% non-vegetarian meals for your 
+                    <span class="badge bg-{{ outcome.risk_color|default('primary') }}">{{ outcome.risk_level|default('Medium Risk') }}</span>
+                {% else %}
+                    {{ diet_charts|length }} customized {{ 'vegetarian' if diet_type == 'vegetarian' else 'non-vegetarian' }} meal plans for your 
+                    <span class="badge bg-{{ outcome.risk_color|default('primary') }}">{{ outcome.risk_level|default('Medium Risk') }}</span>
+                {% endif %}
             </p>
         </div>
     </div>
+
+    <!-- Diet Type Banner for Hybrid -->
+    {% if diet_type == 'hybrid' %}
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="alert alert-info">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-balance-scale fa-2x text-info me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Hybrid Diet Plan</h6>
+                                <p class="mb-0">Your personalized diet combines {{ veg_percentage }}% vegetarian meals with {{ 100 - veg_percentage }}% non-vegetarian meals for optimal nutrition balance.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="progress" style="height: 20px;">
+                            {% set veg_pct = veg_percentage|int %}
+                            {% set non_veg_pct = (100 - veg_pct)|int %}
+                            <div class="progress-bar bg-success" 
+                                 role="progressbar" 
+                                 style="width: {{ veg_pct }}%"
+                                 aria-valuenow="{{ veg_pct }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ veg_pct }}% Veg
+                            </div>
+                            <div class="progress-bar bg-warning" 
+                                 role="progressbar" 
+                                 style="width: {{ non_veg_pct }}%"
+                                 aria-valuenow="{{ non_veg_pct }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ non_veg_pct }}% Non-Veg
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     
     <!-- Image Tooltip (Hidden by default) -->
     <div id="food-image-tooltip" style="display: none; position: fixed; z-index: 10000; background: white; border: 2px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); max-width: 300px;">
@@ -46,32 +101,58 @@
                         <div class="card-body text-center">
                             <h5 class="card-title">
                                 <i class="fas fa-utensils me-2 text-primary"></i>
-                                Chart #{{ chart.chart_number }}
+                                Chart #{{ chart.chart_number|default(loop.index) }}
+                                {% if diet_type == 'hybrid' %}
+                                <br><small class="text-info"><i class="fas fa-balance-scale"></i> Hybrid Diet</small>
+                                {% endif %}
                             </h5>
-                            <div class="display-6 fw-bold text-{{ outcome.risk_color }} mb-2">
-                                {{ chart.total_calories }}
+                            <div class="display-6 fw-bold text-{{ outcome.risk_color|default('primary') }} mb-2">
+                                {{ chart.total_calories|default(0) }}
                             </div>
                             <p class="text-muted">Total Daily Calories</p>
                             <div class="row text-center">
                                 <div class="col-6">
                                     <small class="text-muted d-block">Breakfast</small>
-                                    <strong>{{ chart.breakfast|length }} items</strong>
+                                    <strong>{{ chart.breakfast|length if chart.breakfast else 0 }} items</strong>
                                 </div>
                                 <div class="col-6">
                                     <small class="text-muted d-block">Lunch</small>
-                                    <strong>{{ chart.lunch|length }} items</strong>
+                                    <strong>{{ chart.lunch|length if chart.lunch else 0 }} items</strong>
                                 </div>
                             </div>
                             <div class="row text-center mt-2">
                                 <div class="col-6">
                                     <small class="text-muted d-block">Snacks</small>
-                                    <strong>{{ chart.snacks|length }} items</strong>
+                                    <strong>{{ chart.snacks|length if chart.snacks else 0 }} items</strong>
                                 </div>
                                 <div class="col-6">
                                     <small class="text-muted d-block">Dinner</small>
-                                    <strong>{{ chart.dinner|length }} items</strong>
+                                    <strong>{{ chart.dinner|length if chart.dinner else 0 }} items</strong>
                                 </div>
                             </div>
+                            {% if diet_type == 'hybrid' %}
+                            <div class="mt-3">
+                                <div class="progress" style="height: 15px;">
+                                    {% set veg_pct = veg_percentage|int %}
+                                    {% set non_veg_pct = (100 - veg_pct)|int %}
+                                    <div class="progress-bar bg-success" 
+                                         style="width: {{ veg_pct }}%" 
+                                         title="Vegetarian meals"
+                                         role="progressbar"
+                                         aria-valuenow="{{ veg_pct }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"></div>
+                                    <div class="progress-bar bg-warning" 
+                                         style="width: {{ non_veg_pct }}%" 
+                                         title="Non-vegetarian meals"
+                                         role="progressbar"
+                                         aria-valuenow="{{ non_veg_pct }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"></div>
+                                </div>
+                                <small class="text-muted">{{ veg_percentage }}% Veg | {{ 100 - veg_percentage }}% Non-Veg</small>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -102,7 +183,12 @@
                         <div class="col-md-8">
                             <h4 class="mb-0">
                                 <i class="fas fa-clipboard-list me-2"></i>
-                                Diet Chart #{{ chart.chart_number }}
+                                Diet Chart #{{ chart.chart_number|default(loop.index) }}
+                                {% if diet_type == 'hybrid' %}
+                                <span class="badge bg-info ms-2">
+                                    <i class="fas fa-balance-scale me-1"></i>Hybrid
+                                </span>
+                                {% endif %}
                                 {% if chart.is_recommended %}
                                 <span class="badge bg-dark ms-2">
                                     <i class="fas fa-star me-1"></i>RECOMMENDED
@@ -112,14 +198,14 @@
                         </div>
                         <div class="col-md-4 text-md-end text-center mt-2 mt-md-0">
                             <span class="badge {% if chart.is_recommended %}bg-dark{% else %}bg-light text-dark{% endif %} fs-6 px-3 py-2">
-                                {{ chart.total_calories }} Total Calories
+                                {{ chart.total_calories|default(0) }} Total Calories
                             </span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="card-body p-0">
-                    <!-- Breakfast Section -->
+                    <!-- Meal Sections -->
                     {% set meal_data = [
                         ('breakfast', chart.breakfast, 'fas fa-sun', 'warning', 'Breakfast'),
                         ('lunch', chart.lunch, 'fas fa-sun', 'primary', 'Lunch'),
@@ -135,10 +221,29 @@
                                 <div class="col-md-6">
                                     <h5 class="mb-0 text-{{ color }}">
                                         <i class="{{ icon }} me-2"></i>{{ title }}
+                                        {% if diet_type == 'hybrid' %}
+                                        <!-- Show meal type distribution for hybrid diets -->
+                                        {% set veg_count = meal_items | selectattr('diet_source', 'equalto', 'vegetarian') | list | length %}
+                                        {% set non_veg_count = meal_items | selectattr('diet_source', 'equalto', 'non_vegetarian') | list | length %}
+                                        {% if veg_count > 0 and non_veg_count > 0 %}
+                                        <small class="ms-2">
+                                            <span class="badge bg-success">{{ veg_count }} Veg</span>
+                                            <span class="badge bg-warning">{{ non_veg_count }} Non-Veg</span>
+                                        </small>
+                                        {% elif veg_count > 0 %}
+                                        <small class="ms-2">
+                                            <span class="badge bg-success">All Vegetarian</span>
+                                        </small>
+                                        {% elif non_veg_count > 0 %}
+                                        <small class="ms-2">
+                                            <span class="badge bg-warning">All Non-Vegetarian</span>
+                                        </small>
+                                        {% endif %}
+                                        {% endif %}
                                     </h5>
                                 </div>
                                 <div class="col-md-6 text-md-end">
-                                    {% set meal_calories = meal_items | sum(attribute='calories') %}
+                                    {% set meal_calories = meal_items | sum(attribute='calories') if meal_items else 0 %}
                                     <span class="badge bg-{{ color }} fs-6">
                                         {{ meal_calories }} calories
                                     </span>
@@ -149,7 +254,7 @@
                                 {% for item in meal_items %}
                                 <div class="col-lg-4 col-md-6">
                                     <div class="card border-0 bg-light h-100 food-item-card" 
-                                         data-food-name="{{ item.name }}"
+                                         data-food-name="{{ item.name|default('Unknown Food') }}"
                                          style="cursor: pointer; transition: all 0.3s ease; position: relative;">
                                         <div class="card-body p-3">
                                             <div class="d-flex align-items-start">
@@ -160,15 +265,30 @@
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1 ms-3">
-                                                    <h6 class="card-title mb-1">{{ item.name }}</h6>
+                                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                                        <h6 class="card-title mb-0">{{ item.name|default('Unknown Food') }}</h6>
+                                                        {% if diet_type == 'hybrid' and item.diet_source %}
+                                                        <span class="badge {% if item.diet_source == 'vegetarian' %}bg-success{% else %}bg-warning{% endif %} ms-1" 
+                                                              title="{% if item.diet_source == 'vegetarian' %}Vegetarian{% else %}Non-Vegetarian{% endif %}">
+                                                            {% if item.diet_source == 'vegetarian' %}
+                                                                <i class="fas fa-leaf"></i>
+                                                            {% else %}
+                                                                <i class="fas fa-drumstick-bite"></i>
+                                                            {% endif %}
+                                                        </span>
+                                                        {% endif %}
+                                                    </div>
                                                     <div class="d-flex align-items-center justify-content-between">
                                                         <span class="badge bg-secondary">
-                                                            {{ item.calories }} cal
+                                                            {{ item.calories|default(0) }} cal
                                                         </span>
-                                                        <small class="image-status text-muted" data-food="{{ item.name }}">
+                                                        <small class="image-status text-muted" data-food="{{ item.name|default('Unknown Food') }}">
                                                             <i class="fas fa-spinner fa-spin"></i>
                                                         </small>
                                                     </div>
+                                                    {% if item.notes or item.description %}
+                                                    <small class="text-muted mt-1 d-block">{{ item.notes or item.description }}</small>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         </div>
@@ -185,6 +305,69 @@
         </div>
     </div>
     {% endfor %}
+
+    <!-- Legend for Hybrid Diet -->
+    {% if diet_type == 'hybrid' %}
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Hybrid Diet Legend
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-success me-2">
+                                    <i class="fas fa-leaf"></i>
+                                </span>
+                                <span>Vegetarian meals - Plant-based proteins and nutrients</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-warning me-2">
+                                    <i class="fas fa-drumstick-bite"></i>
+                                </span>
+                                <span>Non-vegetarian meals - Animal-based proteins</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <div class="progress mb-2" style="height: 25px;">
+                                    {% set veg_pct = veg_percentage|int %}
+                                    {% set non_veg_pct = (100 - veg_pct)|int %}
+                                    <div class="progress-bar bg-success" 
+                                         style="width: {{ veg_pct }}%"
+                                         role="progressbar"
+                                         aria-valuenow="{{ veg_pct }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                        {{ veg_pct }}% Vegetarian
+                                    </div>
+                                    <div class="progress-bar bg-warning" 
+                                         style="width: {{ non_veg_pct }}%"
+                                         role="progressbar"
+                                         aria-valuenow="{{ non_veg_pct }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                        {{ non_veg_pct }}% Non-Veg
+                                    </div>
+                                </div>
+                                <small class="text-muted">Your personalized diet balance</small>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mb-0 text-muted mt-3">
+                        <small><i class="fas fa-lightbulb text-warning me-1"></i>
+                        Your hybrid diet combines the best of both vegetarian and non-vegetarian nutrition to provide balanced meals throughout the day based on your {{ veg_percentage }}% vegetarian preference.</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     
     <!-- Calorie Comparison Chart -->
     <div class="row justify-content-center mb-4">
@@ -194,6 +377,9 @@
                     <h5 class="mb-0">
                         <i class="fas fa-chart-bar me-2"></i>
                         Calorie Comparison
+                        {% if diet_type == 'hybrid' %}
+                        <span class="badge bg-info ms-2">Hybrid Diet</span>
+                        {% endif %}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -201,7 +387,7 @@
                         {% for chart in diet_charts %}
                         <div class="col-lg-4 col-md-6 col-sm-8 {% if diet_charts|length == 1 %}col-xl-4{% elif diet_charts|length == 2 %}col-lg-5{% endif %} mb-3">
                             <div class="text-center">
-                                <h6>Chart #{{ chart.chart_number }}</h6>
+                                <h6>Chart #{{ chart.chart_number|default(loop.index) }}</h6>
                                 {% if chart.is_recommended %}
                                 <div class="badge bg-warning text-dark mb-2">
                                     <i class="fas fa-star me-1"></i>Recommended
@@ -209,14 +395,17 @@
                                 {% endif %}
                                 <div class="progress mb-2" style="height: 25px;">
                                     {% set max_calories = diet_charts | map(attribute='total_calories') | max %}
-                                    {% set percentage = (chart.total_calories / max_calories * 100) | round %}
-                                    <div class="progress-bar {% if chart.is_recommended %}bg-warning{% else %}bg-{{ outcome.risk_color }}{% endif %}" 
+                                    {% set percentage = ((chart.total_calories / max_calories * 100) | round)|int if max_calories > 0 else 0 %}
+                                    <div class="progress-bar {% if chart.is_recommended %}bg-warning{% else %}bg-{{ outcome.risk_color|default('primary') }}{% endif %}" 
                                          role="progressbar" 
-                                         style="width: {{ percentage }}%">
-                                        {{ chart.total_calories }}
+                                         style="width: {{ percentage }}%"
+                                         aria-valuenow="{{ percentage }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                        {{ chart.total_calories|default(0) }}
                                     </div>
                                 </div>
-                                <small class="text-muted">{{ chart.total_calories }} calories</small>
+                                <small class="text-muted">{{ chart.total_calories|default(0) }} calories</small>
                             </div>
                         </div>
                         {% endfor %}
@@ -228,7 +417,7 @@
                         <div class="col-lg-4 col-md-6 col-sm-8">
                             <div class="bg-light p-3 rounded">
                                 <h6 class="text-primary">Total Calories</h6>
-                                <div class="h5">{{ diet_charts[0].total_calories }} cal</div>
+                                <div class="h5">{{ diet_charts[0].total_calories|default(0) }} cal</div>
                             </div>
                         </div>
                         {% else %}
@@ -264,10 +453,10 @@
                 <div class="card-body text-center p-4">
                     <h5 class="card-title mb-3">
                         <i class="fas fa-download me-2"></i>
-                        Export Your Diet Plan
+                        Export Your {% if diet_type == 'hybrid' %}Hybrid {% endif %}Diet Plan
                     </h5>
                     <p class="card-text mb-4">
-                        Download a comprehensive PDF report with all your diet charts, nutritional information, 
+                        Download a comprehensive PDF report with all your {{ 'hybrid ' if diet_type == 'hybrid' else '' }}diet charts, nutritional information, 
                         and recommendations that you can share with your healthcare provider.
                     </p>
                     
@@ -302,6 +491,9 @@
                             <h6 class="card-title text-primary">
                                 <i class="fas fa-lightbulb me-2"></i>
                                 Usage Tips
+                                {% if diet_type == 'hybrid' %}
+                                <span class="badge bg-info ms-2">Hybrid Diet</span>
+                                {% endif %}
                             </h6>
                             <ul class="list-unstyled">
                                 <li><i class="fas fa-check text-success me-2"></i>Follow the recommended chart for optimal results</li>
@@ -309,6 +501,10 @@
                                 <li><i class="fas fa-check text-success me-2"></i>Maintain regular meal timings</li>
                                 <li><i class="fas fa-check text-success me-2"></i>Adjust portions based on your activity level</li>
                                 <li><i class="fas fa-check text-success me-2"></i>Hover over food items to see images</li>
+                                {% if diet_type == 'hybrid' %}
+                                <li><i class="fas fa-check text-success me-2"></i>Balance vegetarian and non-vegetarian meals as shown</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Look for the diet type badges on each food item</li>
+                                {% endif %}
                             </ul>
                         </div>
                     </div>
@@ -326,6 +522,10 @@
                                 <li><i class="fas fa-info text-info me-2"></i>Monitor your body's response to new foods</li>
                                 <li><i class="fas fa-info text-info me-2"></i>Include regular physical activity</li>
                                 <li><i class="fas fa-info text-info me-2"></i>This plan complements, doesn't replace medical advice</li>
+                                {% if diet_type == 'hybrid' %}
+                                <li><i class="fas fa-info text-info me-2"></i>Ensure balanced nutrition from both diet types</li>
+                                <li><i class="fas fa-info text-info me-2"></i>Monitor protein intake from various sources</li>
+                                {% endif %}
                             </ul>
                         </div>
                     </div>
@@ -342,9 +542,13 @@
         border-width: 2px !important;
     }
     
+    /* CRITICAL FIXES FOR PROGRESS BARS */
     .progress {
         border-radius: 10px;
-        background-color: rgba(0,0,0,0.1);
+        background-color: rgba(0,0,0,0.1) !important;
+        height: 20px;
+        overflow: hidden;
+        position: relative;
     }
     
     .progress-bar {
@@ -354,6 +558,34 @@
         align-items: center;
         justify-content: center;
         color: #000 !important;
+        font-size: 12px;
+        transition: width 0.6s ease;
+        min-width: 0 !important; /* Critical: Allow bars to show even with small percentages */
+        position: relative;
+    }
+    
+    /* Ensure progress bars are visible with proper colors */
+    .progress-bar.bg-success {
+        background-color: #28a745 !important;
+        color: white !important;
+    }
+
+    .progress-bar.bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+
+    .progress-bar.bg-primary {
+        background-color: #007bff !important;
+        color: white !important;
+    }
+
+    /* Fix for alert visibility */
+    .alert-info {
+        color: #055160 !important;
+        background-color: #cff4fc !important;
+        border-color: #b6effb !important;
+        display: block !important;
     }
     
     .card-hover {
@@ -381,6 +613,16 @@
     
     .image-status.error {
         color: #dc3545 !important;
+    }
+
+    /* Hybrid diet specific styling */
+    .badge.bg-success {
+        background-color: #28a745 !important;
+    }
+    
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
     }
     
     /* Responsive centering for single chart */
@@ -565,7 +807,7 @@ window.addEventListener('focus', function() {
     tabBlurred = false;
 });
 
-// ===== EXISTING FUNCTIONALITY =====
+// ===== MAIN FUNCTIONALITY =====
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize cleanup session first
     initializeCleanupSession();
@@ -587,7 +829,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const uniqueFoodNames = new Set();
     foodItems.forEach(item => {
         const foodName = item.getAttribute('data-food-name');
-        if (foodName) uniqueFoodNames.add(foodName);
+        if (foodName && foodName !== 'Unknown Food') uniqueFoodNames.add(foodName);
     });
     totalImages = uniqueFoodNames.size;
     
@@ -767,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners to food items for tooltip display only
     foodItems.forEach(item => {
         const foodName = item.getAttribute('data-food-name');
-        if (!foodName) return;
+        if (!foodName || foodName === 'Unknown Food') return;
         
         item.addEventListener('mouseenter', (e) => {
             showTooltip(e, foodName);
@@ -816,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Start the download process after a short delay to let the page settle
     setTimeout(() => {
         downloadImagesInBatches();
-    }, 10);
+    }, 100);
     
     // Enhanced navigation button handling
     const navButtons = document.querySelectorAll('a[href*="predict"], a[href*="diet-plan"], a[href="/"], a[href*="new-prediction"]');
@@ -829,14 +1071,31 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Existing animation code
-    // Animate progress bars
+    // FIXED PROGRESS BAR ANIMATION
     const progressBars = document.querySelectorAll('.progress-bar');
+    console.log(`Found ${progressBars.length} progress bars for animation`);
+    
     progressBars.forEach((bar, index) => {
-        const width = bar.style.width;
+        // Get target width from aria-valuenow or parse from style
+        const ariaValue = bar.getAttribute('aria-valuenow');
+        const styleWidth = bar.style.width;
+        const targetWidth = ariaValue ? ariaValue + '%' : styleWidth;
+        
+        // Store original content
+        const originalText = bar.textContent;
+        
+        // Ensure the bar is visible even at 0%
+        bar.style.minWidth = '0';
+        
+        // Start animation from 0
         bar.style.width = '0%';
+        bar.textContent = '';
+        
+        // Animate to target with staggered timing
         setTimeout(() => {
-            bar.style.width = width;
+            bar.style.width = targetWidth;
+            bar.textContent = originalText;
+            console.log(`Animated progress bar ${index + 1} to ${targetWidth}`);
         }, index * 200 + 500);
     });
     
@@ -852,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const counters = document.querySelectorAll('.display-6, .h5');
     counters.forEach(counter => {
         const target = parseInt(counter.textContent);
-        if (!isNaN(target)) {
+        if (!isNaN(target) && target > 0) {
             let current = 0;
             const increment = target / 50;
             const timer = setInterval(() => {
@@ -883,6 +1142,23 @@ document.addEventListener('DOMContentLoaded', function() {
         card.style.transition = 'all 0.6s ease';
         observer.observe(card);
     });
+
+    // Hybrid diet specific animations
+    {% if diet_type == 'hybrid' %}
+    // Add special hover effect to diet source badges
+    const dietBadges = document.querySelectorAll('.badge.bg-success, .badge.bg-warning');
+    dietBadges.forEach(badge => {
+        badge.style.transition = 'all 0.3s ease';
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1)';
+            this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+        });
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.boxShadow = '';
+        });
+    });
+    {% endif %}
 });
 
 // Global cleanup function for debugging
@@ -890,6 +1166,6 @@ window.forceCleanup = function() {
     executeCleanup('manual_debug');
 };
 
-console.log('Diet chart cleanup system initialized');
+console.log('Diet chart system initialized with fixed progress bars{% if diet_type == "hybrid" %} and hybrid diet support{% endif %}');
 </script>
 {% endblock %}
