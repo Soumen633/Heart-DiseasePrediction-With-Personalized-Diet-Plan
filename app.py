@@ -11,10 +11,7 @@ from flask import (
 )
 import pickle
 import numpy as np
-import pandas as pd
 import json
-from reportlab.platypus import KeepTogether, CondPageBreak
-from reportlab.lib.units import inch
 import os
 from reportlab.platypus import (
     SimpleDocTemplate,
@@ -23,11 +20,8 @@ from reportlab.platypus import (
     Table,
     TableStyle,
     PageBreak,
-    Image,
 )
 from reportlab.lib.units import mm
-from PIL import Image as PILImage  # Add this import
-import tempfile  # Add this import
 import atexit
 from datetime import datetime, timedelta
 import uuid
@@ -35,7 +29,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from icrawler.builtin import BingImageCrawler
 
 import random
-from werkzeug.utils import secure_filename
 import sklearn  # noqa: F401
 import joblib
 from flask import render_template_string
@@ -43,27 +36,12 @@ import threading
 import time
 
 import shutil
-import atexit
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Paragraph,
-    Spacer,
-    Table,
-    TableStyle,
-    PageBreak,
-)
-from reportlab.platypus.frames import Frame
-from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
-from reportlab.graphics.shapes import Drawing, Rect, String, Circle
-from reportlab.graphics import renderPDF
-from reportlab.graphics.charts.piecharts import Pie
-from reportlab.graphics.charts.barcharts import VerticalBarChart
-from reportlab.lib.colors import HexColor, Color
+
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.colors import HexColor
 import io
 
 
@@ -89,24 +67,6 @@ os.makedirs("templates", exist_ok=True)
 
 # Global variable to track crawling status
 crawling_status = {}
-
-import threading
-import time
-import requests
-import os
-##extra fxn 
-# def keep_alive():
-#     while True:
-#         try:
-#             url = os.getenv('RENDER_EXTERNAL_URL', 'https://carepulse-zdn2.onrender.com')
-#             requests.get(url)
-#         except:
-#             pass
-#         time.sleep(30)  # 10 minutes
-        ##etra end
-
-# Start the keep-alive thread
-# threading.Thread(target=keep_alive, daemon=True).start()
 
 
 def crawl_food_image(food_name, max_retries=3):
@@ -417,84 +377,926 @@ def start_batch_crawling_for_diet(diet_charts):
 
     threading.Thread(target=extract_and_crawl, daemon=True).start()
 
-@app.route('/model-statistics')
+
+# Add this route to your Flask app.py file
+
+
+@app.route("/model-statistics")
 def model_statistics():
     """
     Display comprehensive model statistics and performance metrics
     """
-    return render_template('model_statistics.html')
+    return render_template("model_statistics.html")
+
+
+# Add these functions to your existing app.py file
+
+
+@app.route("/generate-diet", methods=["POST"])
+def generate_diet():
+    """Generate personalized diet charts based on risk assessment with hybrid support"""
+    try:
+        # Get user preferences
+        diet_type = request.form.get("diet_type", "vegetarian")
+        num_charts = int(request.form.get("num_charts", 3))
+        veg_percentage = (
+            int(request.form.get("veg_percentage", 50))
+            if diet_type == "hybrid"
+            else None
+        )
+
+        # Validate number of charts
+        if num_charts < 1 or num_charts > 10:
+            num_charts = 3
+
+        # Load outcome from session first, then pickle as fallback
+        outcome = None
+        if "prediction_result" in session:
+            outcome = session["prediction_result"]
+        else:
+            with open("static/diet_images/outcome.pkl", "rb") as f:
+                outcome = pickle.load(f)
+
+        if not diet_plan:
+            flash(
+                "Diet plan data not available. Please check data/Final_diet_plan.json file.",
+                "error",
+            )
+            return redirect(url_for("diet_plan_page"))
+
+        # Get diet recommendation based on risk category
+        risk_category = outcome["risk_category"]
+
+        print(f"Generating diet for: {diet_type}, {risk_category}")
+        if diet_type == "hybrid":
+            print(f"Hybrid diet with {veg_percentage}% vegetarian meals")
+
+        try:
+            # Generate diet charts based on diet type
+            if diet_type == "hybrid":
+                diet_charts = create_hybrid_diet_charts(
+                    diet_plan, risk_category, veg_percentage, num_charts
+                )
+            else:
+                # Access diet data from JSON structure for pure veg/non-veg
+                diet_data = diet_plan["diet_plan"][diet_type][risk_category]
+                print(f"Found diet data with meals: {list(diet_data.keys())}")
+                diet_charts = create_random_diet_charts(diet_data, num_charts)
+
+        except KeyError as e:
+            print(f"KeyError accessing diet data: {e}")
+            available_categories = list(
+                diet_plan.get("diet_plan", {})
+                .get(diet_type if diet_type != "hybrid" else "vegetarian", {})
+                .keys()
+            )
+            flash(
+                f"No diet plan found for {risk_category}. Available categories: {available_categories}",
+                "error",
+            )
+            return redirect(url_for("diet_plan_page"))
+
+        if not diet_charts:
+            flash("Could not generate diet charts. Please check diet data.", "error")
+            return redirect(url_for("diet_plan_page"))
+
+        # Find recommended chart (one closest to average calories)
+        if len(diet_charts) > 1:
+            total_calories = [chart.get("total_calories", 0) for chart in diet_charts]
+            avg_calories = sum(total_calories) / len(total_calories)
+            closest_chart = min(
+                diet_charts,
+                key=lambda x: abs(x.get("total_calories", 0) - avg_calories),
+            )
+            recommended_chart_num = closest_chart["chart_number"]
+        else:
+            recommended_chart_num = diet_charts[0]["chart_number"]
+
+        # Mark recommended chart
+        for chart in diet_charts:
+            chart["is_recommended"] = chart["chart_number"] == recommended_chart_num
+
+        print(
+            f"Generated {len(diet_charts)} diet charts, recommended: Chart {recommended_chart_num}"
+        )
+
+        # Store diet charts and preferences in session for PDF generation
+        session["diet_charts"] = diet_charts
+        session["diet_type"] = diet_type
+        session["veg_percentage"] = veg_percentage
+        session["is_vegetarian"] = (
+            diet_type == "vegetarian"
+        )  # Keep for backward compatibility
+        session.permanent = True
+
+        # Start crawling images IMMEDIATELY when diet is generated
+        start_image_crawling_for_diet_optimized(diet_charts)
+
+        return render_template(
+            "diet_charts.html",
+            diet_charts=diet_charts,
+            outcome=outcome,
+            diet_type=diet_type,
+            veg_percentage=veg_percentage,
+            is_vegetarian=diet_type == "vegetarian",
+        )
+
+    except FileNotFoundError:
+        flash("Please complete heart disease prediction first.", "warning")
+        return redirect(url_for("predict"))
+    except Exception as e:
+        print(f"Error in generate_diet: {e}")
+        flash(f"Error generating diet plan: {str(e)}", "error")
+        return redirect(url_for("diet_plan_page"))
+
+
+def create_hybrid_diet_charts(
+    diet_plan_data, risk_category, veg_percentage, num_charts=3
+):
+    """Create hybrid diet charts mixing vegetarian and non-vegetarian meals"""
+    if not diet_plan_data or "diet_plan" not in diet_plan_data:
+        print("No diet plan data provided")
+        return []
+
+    try:
+        # Get both vegetarian and non-vegetarian data
+        veg_data = diet_plan_data["diet_plan"]["vegetarian"][risk_category]
+        non_veg_data = diet_plan_data["diet_plan"]["non_vegetarian"][risk_category]
+
+        print(
+            f"Creating {num_charts} hybrid diet charts with {veg_percentage}% vegetarian meals"
+        )
+        print(f"Veg meals available: {list(veg_data.keys())}")
+        print(f"Non-veg meals available: {list(non_veg_data.keys())}")
+
+    except KeyError as e:
+        print(f"Error accessing diet data for hybrid: {e}")
+        return []
+
+    # Define meal configuration
+    meal_config = {"breakfast": 2, "lunch": 3, "snacks": 2, "dinner": 3}
+
+    diet_charts = []
+
+    for chart_num in range(1, num_charts + 1):
+        chart = {
+            "chart_number": chart_num,
+            "total_calories": 0,
+            "diet_type": "hybrid",
+            "veg_percentage": veg_percentage,
+        }
+
+        for meal_type, num_items in meal_config.items():
+            # Get available items from both diet types
+            veg_items = veg_data.get(meal_type, [])
+            non_veg_items = non_veg_data.get(meal_type, [])
+
+            if not veg_items and not non_veg_items:
+                chart[meal_type] = []
+                continue
+
+            # Calculate how many vegetarian vs non-vegetarian items to include
+            veg_count = max(1, round(num_items * veg_percentage / 100))
+            non_veg_count = num_items - veg_count
+
+            # Adjust if we don't have enough items
+            available_veg = min(veg_count, len(veg_items))
+            available_non_veg = min(non_veg_count, len(non_veg_items))
+
+            # If one category is short, compensate with the other
+            if available_veg < veg_count and len(non_veg_items) > available_non_veg:
+                available_non_veg = min(
+                    available_non_veg + (veg_count - available_veg), len(non_veg_items)
+                )
+            elif available_non_veg < non_veg_count and len(veg_items) > available_veg:
+                available_veg = min(
+                    available_veg + (non_veg_count - available_non_veg), len(veg_items)
+                )
+
+            selected_items = []
+
+            # Select vegetarian items
+            if available_veg > 0 and veg_items:
+                selected_veg = random.sample(veg_items, available_veg)
+                for item in selected_veg:
+                    item_copy = item.copy()
+                    item_copy["diet_source"] = "vegetarian"
+                    selected_items.append(item_copy)
+
+            # Select non-vegetarian items
+            if available_non_veg > 0 and non_veg_items:
+                selected_non_veg = random.sample(non_veg_items, available_non_veg)
+                for item in selected_non_veg:
+                    item_copy = item.copy()
+                    item_copy["diet_source"] = "non_vegetarian"
+                    selected_items.append(item_copy)
+
+            # Shuffle the combined items for variety
+            random.shuffle(selected_items)
+
+            chart[meal_type] = selected_items
+
+            # Calculate calories for this meal
+            meal_calories = sum(item.get("calories", 0) for item in selected_items)
+            chart["total_calories"] += meal_calories
+
+        diet_charts.append(chart)
+
+    return diet_charts
+
+
+def create_random_diet_charts(diet_data, num_charts=3):
+    """Create random diet charts from available diet data (updated to handle diet_source)"""
+    if not diet_data:
+        print("No diet data provided")
+        return []
+
+    # Define meal configuration (items per meal type)
+    meal_config = {"breakfast": 2, "lunch": 3, "snacks": 2, "dinner": 3}
+
+    diet_charts = []
+
+    print(f"Creating {num_charts} diet charts from meals: {list(diet_data.keys())}")
+
+    for chart_num in range(1, num_charts + 1):
+        chart = {"chart_number": chart_num, "total_calories": 0}
+
+        for meal_type, num_items in meal_config.items():
+            if meal_type in diet_data and diet_data[meal_type]:
+                available_items = diet_data[meal_type]
+
+                # Ensure we don't try to sample more items than available
+                items_to_select = min(num_items, len(available_items))
+
+                if items_to_select > 0:
+                    # Randomly select items for this meal
+                    selected_items = random.sample(available_items, items_to_select)
+
+                    # Add diet_source information for consistency
+                    for item in selected_items:
+                        if "diet_source" not in item:
+                            # Infer from the chart type or set as unknown
+                            item["diet_source"] = "unknown"
+
+                    chart[meal_type] = selected_items
+
+                    # Calculate calories for this meal
+                    meal_calories = sum(
+                        item.get("calories", 0) for item in selected_items
+                    )
+                    chart["total_calories"] += meal_calories
+                else:
+                    chart[meal_type] = []
+            else:
+                chart[meal_type] = []
+                print(f"Warning: No {meal_type} data available")
+
+        diet_charts.append(chart)
+
+    return diet_charts
+
+
+@app.route("/download-pdf")
+def download_pdf():
+    """Generate and download professional PDF with hybrid diet support"""
+    try:
+        # Load outcome from session first, then pickle as fallback
+        outcome = None
+        if "prediction_result" in session:
+            outcome = session["prediction_result"]
+        else:
+            try:
+                with open("static/diet_images/outcome.pkl", "rb") as f:
+                    outcome = pickle.load(f)
+            except FileNotFoundError:
+                flash("Please complete heart disease prediction first.", "warning")
+                return redirect(url_for("predict"))
+
+        # Get diet charts from session
+        diet_charts = session.get("diet_charts")
+        if not diet_charts:
+            flash("Please generate diet charts first.", "warning")
+            return redirect(url_for("diet_plan_page"))
+
+        # Add diet preferences to outcome for PDF generation
+        diet_type = session.get("diet_type", "vegetarian")
+        outcome["diet_type"] = diet_type
+        outcome["veg_percentage"] = session.get("veg_percentage", None)
+        outcome["is_vegetarian"] = (
+            diet_type == "vegetarian"
+        )  # Keep for backward compatibility
+
+        # Generate professional PDF
+        buffer = io.BytesIO()
+        generate_diet_pdf_professional(buffer, outcome, diet_charts)
+        buffer.seek(0)
+
+        # Create filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        diet_type_suffix = f"_{diet_type}"
+        if diet_type == "hybrid":
+            diet_type_suffix += f"_{outcome['veg_percentage']}pct_veg"
+        filename = f"CarePulse_Diet_Plan{diet_type_suffix}_{timestamp}.pdf"
+
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=filename,
+            mimetype="application/pdf",
+        )
+
+    except Exception as e:
+        print(f"Error generating PDF: {e}")
+        import traceback
+
+        traceback.print_exc()
+        flash(f"Error generating PDF: {str(e)}", "error")
+        return redirect(url_for("diet_plan_page"))
+
+
+# Update the PDF generation function to handle hybrid diets
+def generate_diet_pdf_professional(buffer, outcome, diet_charts):
+    """Generate a clean, professional PDF with hybrid diet support"""
+    from reportlab.platypus import KeepTogether
+    from reportlab.lib.units import inch
+
+    # Create PDF document with better margins
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=20 * mm,
+        leftMargin=20 * mm,
+        topMargin=20 * mm,
+        bottomMargin=20 * mm,
+    )
+
+    # Define professional colors
+    primary_color = HexColor("#1f2937")  # Dark gray
+    accent_color = HexColor("#3b82f6")  # Blue
+    success_color = HexColor("#059669")  # Green
+    warning_color = HexColor("#d97706")  # Orange
+    danger_color = HexColor("#dc2626")  # Red
+    light_gray = HexColor("#f9fafb")
+    border_color = HexColor("#e5e7eb")
+
+    risk_color_map = {
+        "success": success_color,
+        "warning": warning_color,
+        "danger": danger_color,
+        "primary": accent_color,
+    }
+
+    # Professional styles with better spacing
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        "ProfessionalTitle",
+        parent=styles["Heading1"],
+        fontSize=28,
+        spaceAfter=30,
+        spaceBefore=20,
+        alignment=TA_CENTER,
+        textColor=primary_color,
+        fontName="Helvetica-Bold",
+        leading=34,
+    )
+
+    subtitle_style = ParagraphStyle(
+        "ProfessionalSubtitle",
+        parent=styles["Heading2"],
+        fontSize=18,
+        spaceAfter=20,
+        spaceBefore=10,
+        alignment=TA_CENTER,
+        textColor=accent_color,
+        fontName="Helvetica",
+        leading=22,
+    )
+
+    section_header_style = ParagraphStyle(
+        "SectionHeader",
+        parent=styles["Heading2"],
+        fontSize=16,
+        spaceAfter=15,
+        spaceBefore=25,
+        textColor=primary_color,
+        fontName="Helvetica-Bold",
+        borderWidth=1,
+        borderColor=accent_color,
+        borderPadding=12,
+        backColor=light_gray,
+        leading=20,
+        keepWithNext=True,
+    )
+
+    normal_style = ParagraphStyle(
+        "ProfessionalNormal",
+        parent=styles["Normal"],
+        fontSize=11,
+        spaceAfter=8,
+        spaceBefore=4,
+        fontName="Helvetica",
+        leading=16,
+        leftIndent=0,
+        rightIndent=0,
+    )
+
+    meal_header_style = ParagraphStyle(
+        "MealHeader",
+        parent=styles["Heading3"],
+        fontSize=14,
+        spaceAfter=10,
+        spaceBefore=15,
+        textColor=accent_color,
+        fontName="Helvetica-Bold",
+        leading=18,
+        keepWithNext=True,
+    )
+
+    info_style = ParagraphStyle(
+        "InfoStyle",
+        parent=normal_style,
+        fontSize=10,
+        textColor=HexColor("#6b7280"),
+        alignment=TA_CENTER,
+        spaceAfter=12,
+        spaceBefore=8,
+    )
+
+    story = []
+
+    # ===== HEADER SECTION =====
+    story.append(Spacer(1, 0.5 * inch))
+    story.append(Paragraph("CarePulse", title_style))
+    story.append(Paragraph("Personalized Diet Plan Report", subtitle_style))
+
+    generation_date = datetime.now().strftime("%B %d, %Y at %I:%M %p")
+    story.append(Paragraph(f"Generated on: {generation_date}", info_style))
+    story.append(Spacer(1, 0.4 * inch))
+
+    # ===== PATIENT INFORMATION SECTION =====
+    story.append(Paragraph("Patient Information", section_header_style))
+
+    # Determine diet type description
+    diet_type = outcome.get("diet_type", "vegetarian")
+    if diet_type == "hybrid":
+        veg_percentage = outcome.get("veg_percentage", 50)
+        diet_description = f"Hybrid Diet ({veg_percentage}% Vegetarian, {100 - veg_percentage}% Non-Vegetarian)"
+    elif diet_type == "vegetarian":
+        diet_description = "Vegetarian"
+    else:
+        diet_description = "Non-Vegetarian"
+
+    patient_data = [
+        ["Parameter", "Value"],
+        ["Name", "Patient"],
+        ["Age", f"{outcome['user_data']['age']} years"],
+        ["Gender", outcome["user_data"]["gender"]],
+        ["BMI", f"{outcome['user_data']['bmi']}"],
+        ["Diet Type", diet_description],
+    ]
+
+    patient_table = Table(patient_data, colWidths=[3.2 * inch, 2.8 * inch])
+    patient_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), accent_color),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 11),
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("BACKGROUND", (0, 1), (-1, -1), light_gray),
+                ("GRID", (0, 0), (-1, -1), 1, border_color),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 12),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                ("TOPPADDING", (0, 0), (-1, -1), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+            ]
+        )
+    )
+
+    story.append(KeepTogether([patient_table]))
+    story.append(Spacer(1, 0.3 * inch))
+
+    # ===== RISK ASSESSMENT SECTION =====
+    story.append(Paragraph("Risk Assessment", section_header_style))
+
+    risk_data = [
+        ["Assessment Parameter", "Result"],
+        ["Heart Disease Risk Level", outcome["risk_level"]],
+        ["Risk Probability", f"{outcome['risk_probability']}%"],
+        ["Confidence Level", outcome["confidence_level"]],
+        ["Risk Category", outcome["risk_category"].replace("_", " ").title()],
+    ]
+
+    risk_table = Table(risk_data, colWidths=[3.2 * inch, 2.8 * inch])
+    risk_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), accent_color),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 11),
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("BACKGROUND", (0, 1), (-1, -1), light_gray),
+                ("GRID", (0, 0), (-1, -1), 1, border_color),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 12),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                ("TOPPADDING", (0, 0), (-1, -1), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+                # Highlight risk level row
+                (
+                    "BACKGROUND",
+                    (1, 1),
+                    (1, 1),
+                    risk_color_map.get(outcome["risk_color"], accent_color),
+                ),
+                ("TEXTCOLOR", (1, 1), (1, 1), colors.white),
+                ("FONTNAME", (1, 1), (1, 1), "Helvetica-Bold"),
+            ]
+        )
+    )
+
+    story.append(KeepTogether([risk_table]))
+    story.append(Spacer(1, 0.3 * inch))
+
+    # ===== DIET PLAN OVERVIEW =====
+    story.append(Paragraph("Diet Plan Overview", section_header_style))
+
+    total_charts = len(diet_charts)
+    calories_list = [chart["total_calories"] for chart in diet_charts]
+    avg_calories = sum(calories_list) / len(calories_list) if calories_list else 0
+    min_calories = min(calories_list) if calories_list else 0
+    max_calories = max(calories_list) if calories_list else 0
+    recommended_chart = next(
+        (i + 1 for i, chart in enumerate(diet_charts) if chart.get("is_recommended")), 1
+    )
+
+    overview_data = [
+        ["Plan Details", "Information"],
+        ["Total Diet Charts", str(total_charts)],
+        ["Recommended Chart", f"Chart #{recommended_chart}"],
+        ["Diet Type", diet_description],
+        ["Average Daily Calories", f"{avg_calories:.0f} calories"],
+        ["Calorie Range", f"{min_calories} - {max_calories} calories"],
+        ["Plan Duration", "Daily meal plans"],
+    ]
+
+    overview_table = Table(overview_data, colWidths=[3.2 * inch, 2.8 * inch])
+    overview_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), accent_color),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 11),
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("BACKGROUND", (0, 1), (-1, -1), light_gray),
+                ("GRID", (0, 0), (-1, -1), 1, border_color),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 12),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                ("TOPPADDING", (0, 0), (-1, -1), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+            ]
+        )
+    )
+
+    story.append(KeepTogether([overview_table]))
+
+    # ===== PAGE BREAK BEFORE DIET CHARTS =====
+    story.append(PageBreak())
+
+    # ===== INDIVIDUAL DIET CHARTS WITH HYBRID SUPPORT =====
+    for i, chart in enumerate(diet_charts):
+        # Start each chart on a new page
+        if i > 0:
+            story.append(PageBreak())
+
+        # Chart header with better spacing
+        chart_title = f"Diet Chart #{chart['chart_number']}"
+        if chart.get("is_recommended"):
+            chart_title += " - RECOMMENDED"
+
+        story.append(Paragraph(chart_title, section_header_style))
+
+        # Total calories info
+        calories_info = ParagraphStyle(
+            "CaloriesInfo",
+            parent=normal_style,
+            fontSize=13,
+            fontName="Helvetica-Bold",
+            textColor=accent_color,
+            spaceAfter=15,
+            spaceBefore=5,
+        )
+        story.append(
+            Paragraph(
+                f"Total Daily Calories: {chart['total_calories']} calories",
+                calories_info,
+            )
+        )
+
+        # Process each meal with better organization
+        meal_sections = [
+            ("breakfast", "Breakfast", warning_color),
+            ("lunch", "Lunch", accent_color),
+            ("snacks", "Snacks", success_color),
+            ("dinner", "Dinner", primary_color),
+        ]
+
+        chart_elements = []  # Collect all elements for this chart
+
+        for meal_key, meal_name, meal_color in meal_sections:
+            meal_items = chart.get(meal_key, [])
+            if not meal_items:
+                continue
+
+            # Calculate meal calories
+            meal_calories = sum(item.get("calories", 0) for item in meal_items)
+
+            # Meal header
+            meal_title = f"{meal_name} ({meal_calories} calories)"
+            meal_header_para = Paragraph(meal_title, meal_header_style)
+
+            # Create meal items table with diet source information for hybrid diets
+            if diet_type == "hybrid":
+                meal_table_data = [["Food Item", "Calories", "Diet Type", "Notes"]]
+                col_widths = [2.5 * inch, 0.7 * inch, 0.8 * inch, 2.0 * inch]
+            else:
+                meal_table_data = [["Food Item", "Calories", "Notes"]]
+                col_widths = [3.0 * inch, 0.8 * inch, 2.2 * inch]
+
+            for item in meal_items:
+                food_name = item.get("name", "Unknown")
+                calories = item.get("calories", 0)
+                notes = item.get("notes", item.get("description", ""))
+                diet_source = item.get("diet_source", "unknown")
+
+                # Limit notes length to prevent overflow
+                if len(notes) > 40:
+                    notes = notes[:37] + "..."
+
+                if diet_type == "hybrid":
+                    # Display diet source for hybrid charts
+                    diet_label = (
+                        "🌱 Veg"
+                        if diet_source == "vegetarian"
+                        else "🥩 Non-Veg"
+                        if diet_source == "non_vegetarian"
+                        else "❓"
+                    )
+                    meal_table_data.append(
+                        [food_name, f"{calories}", diet_label, notes]
+                    )
+                else:
+                    meal_table_data.append([food_name, f"{calories}", notes])
+
+            meal_table = Table(
+                meal_table_data,
+                colWidths=col_widths,
+                repeatRows=1,  # Repeat header if table splits
+            )
+            meal_table.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (-1, 0), meal_color),
+                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                        ("FONTSIZE", (0, 0), (-1, -1), 10),
+                        ("ALIGN", (0, 0), (0, -1), "LEFT"),
+                        ("ALIGN", (1, 1), (1, -1), "CENTER"),
+                        ("ALIGN", (-1, 1), (-1, -1), "LEFT"),
+                        ("BACKGROUND", (0, 1), (-1, -1), colors.white),
+                        ("GRID", (0, 0), (-1, -1), 0.5, border_color),
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                        ("TOPPADDING", (0, 0), (-1, -1), 8),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+                        # Alternate row colors
+                        (
+                            "ROWBACKGROUNDS",
+                            (0, 1),
+                            (-1, -1),
+                            [colors.white, HexColor("#f8fafc")],
+                        ),
+                    ]
+                )
+            )
+
+            # Keep meal header with its table
+            chart_elements.append(
+                KeepTogether(
+                    [meal_header_para, Spacer(1, 5), meal_table, Spacer(1, 15)]
+                )
+            )
+
+        # Add all chart elements
+        story.extend(chart_elements)
+
+    # ===== PAGE BREAK BEFORE RECOMMENDATIONS =====
+    story.append(PageBreak())
+
+    # ===== RECOMMENDATIONS SECTION =====
+    story.append(Paragraph("Health & Dietary Recommendations", section_header_style))
+
+    recommendations = get_recommendations_by_risk(outcome["risk_category"])
+
+    recommendation_elements = []
+    for i, recommendation in enumerate(recommendations, 1):
+        rec_style = ParagraphStyle(
+            "RecommendationStyle",
+            parent=normal_style,
+            leftIndent=15,
+            bulletIndent=5,
+            spaceAfter=10,
+            spaceBefore=5,
+        )
+        recommendation_elements.append(Paragraph(f"{i}. {recommendation}", rec_style))
+
+    story.extend(recommendation_elements)
+    story.append(Spacer(1, 0.3 * inch))
+
+    # ===== HYBRID DIET SPECIFIC GUIDELINES =====
+    if diet_type == "hybrid":
+        story.append(Paragraph("Hybrid Diet Guidelines", section_header_style))
+
+        hybrid_guidelines = [
+            f"Your hybrid diet contains {outcome.get('veg_percentage', 50)}% vegetarian meals for balanced nutrition.",
+            "Ensure adequate protein intake from both plant and animal sources throughout the day.",
+            "Plan your meals to alternate between vegetarian and non-vegetarian options for variety.",
+            "Pay attention to iron absorption by combining vegetarian iron sources with vitamin C rich foods.",
+            "Monitor your body's response to the mixed diet and adjust the balance if needed.",
+        ]
+
+        for guideline in hybrid_guidelines:
+            guideline_style = ParagraphStyle(
+                "HybridGuidelineStyle",
+                parent=normal_style,
+                leftIndent=15,
+                bulletIndent=5,
+                spaceAfter=8,
+                spaceBefore=4,
+                textColor=HexColor("#0066cc"),
+            )
+            story.append(Paragraph(f"• {guideline}", guideline_style))
+
+        story.append(Spacer(1, 0.3 * inch))
+
+    # ===== IMPORTANT NOTES SECTION =====
+    story.append(Paragraph("Important Guidelines", section_header_style))
+
+    guidelines = [
+        "Follow the recommended portion sizes for optimal results.",
+        "Drink at least 8-10 glasses of water throughout the day.",
+        "Maintain regular meal timings as suggested in the charts.",
+        "Include physical activity as recommended by your healthcare provider.",
+        "Monitor your body's response to the diet plan and adjust as needed.",
+    ]
+
+    guideline_elements = []
+    for guideline in guidelines:
+        guideline_style = ParagraphStyle(
+            "GuidelineStyle",
+            parent=normal_style,
+            leftIndent=15,
+            bulletIndent=5,
+            spaceAfter=8,
+            spaceBefore=4,
+        )
+        guideline_elements.append(Paragraph(f"• {guideline}", guideline_style))
+
+    story.extend(guideline_elements)
+    story.append(Spacer(1, 0.3 * inch))
+
+    # ===== DISCLAIMER SECTION =====
+    disclaimer_style = ParagraphStyle(
+        "Disclaimer",
+        parent=normal_style,
+        fontSize=10,
+        textColor=HexColor("#6b7280"),
+        borderWidth=1,
+        borderColor=border_color,
+        borderPadding=15,
+        backColor=HexColor("#fef2f2"),
+        spaceAfter=20,
+        spaceBefore=10,
+        leading=14,
+    )
+
+    disclaimer_text = """
+    <b>Medical Disclaimer:</b> This diet plan is generated based on risk assessment algorithms and is for 
+    informational purposes only. It should not replace professional medical advice, diagnosis, or treatment. 
+    Always consult with a qualified healthcare provider or registered dietitian before making significant 
+    changes to your diet, especially if you have existing health conditions, allergies, or are taking medications.
+    """
+
+    story.append(Paragraph(disclaimer_text, disclaimer_style))
+
+    # ===== FOOTER =====
+    footer_style = ParagraphStyle(
+        "Footer",
+        parent=normal_style,
+        fontSize=9,
+        alignment=TA_CENTER,
+        textColor=HexColor("#9ca3af"),
+        spaceAfter=5,
+        spaceBefore=10,
+    )
+
+    story.append(Spacer(1, 0.2 * inch))
+    story.append(
+        Paragraph(
+            "Generated by CarePulse - Your Digital Health Companion", footer_style
+        )
+    )
+    story.append(
+        Paragraph(f"Report ID: {datetime.now().strftime('%Y%m%d%H%M%S')}", footer_style)
+    )
+
+    # Build the PDF with better frame settings
+    doc.build(story)
+    return buffer
+
 
 # If you want to make the statistics dynamic, you can also create a more detailed version:
 
-@app.route('/model-statistics-detailed')
+
+@app.route("/model-statistics-detailed")
 def model_statistics_detailed():
     """
     Display detailed model statistics with actual computed metrics
     """
     # Model performance metrics (replace with actual values from your model)
     performance_metrics = {
-        'accuracy': 0.946,
-        'precision': 0.997,
-        'recall': 0.866,
-        'f1_score': 0.927,
-        'roc_auc': 0.927
+        "accuracy": 0.946,
+        "precision": 0.866,
+        "recall": 0.927,
+        "f1_score": 0.927,
+        "roc_auc": 0.927,
     }
-    
+
     # Confusion matrix values (replace with actual values)
     confusion_matrix = {
-        'true_negatives': 1598,
-        'false_positives': 2,
-        'false_negatives': 143,
-        'true_positives': 924
+        "true_negatives": 1598,
+        "false_positives": 2,
+        "false_negatives": 143,
+        "true_positives": 924,
     }
-    
+
     # Feature correlations (replace with actual computed correlations)
     feature_correlations = {
-        'positive_factors': [
-            {'name': 'BMI (Body Mass Index)', 'correlation': 0.020},
-            {'name': 'Stress Level', 'correlation': 0.016},
-            {'name': 'High LDL Cholesterol', 'correlation': 0.008},
-            {'name': 'Homocysteine Level', 'correlation': 0.008},
-            {'name': 'Exercise Habits', 'correlation': 0.005}
+        "positive_factors": [
+            {"name": "BMI (Body Mass Index)", "correlation": 0.020},
+            {"name": "Stress Level", "correlation": 0.016},
+            {"name": "High LDL Cholesterol", "correlation": 0.008},
+            {"name": "Homocysteine Level", "correlation": 0.008},
+            {"name": "Exercise Habits", "correlation": 0.005},
         ],
-        'negative_factors': [
-            {'name': 'Alcohol Consumption', 'correlation': -0.018},
-            {'name': 'Gender', 'correlation': -0.017},
-            {'name': 'Blood Pressure', 'correlation': -0.014},
-            {'name': 'Sugar Consumption', 'correlation': -0.013},
-            {'name': 'Age', 'correlation': -0.009}
-        ]
+        "negative_factors": [
+            {"name": "Alcohol Consumption", "correlation": -0.018},
+            {"name": "Gender", "correlation": -0.017},
+            {"name": "Blood Pressure", "correlation": -0.014},
+            {"name": "Sugar Consumption", "correlation": -0.013},
+            {"name": "Age", "correlation": -0.009},
+        ],
     }
-    
+
     # Model hyperparameters
     model_config = {
-        'algorithm': 'Random Forest Classifier',
-        'n_estimators': 400,
-        'max_depth': 30,
-        'min_samples_split': 2,
-        'min_samples_leaf': 1,
-        'max_features': 'sqrt',
-        'class_weight': 'balanced'
+        "algorithm": "Random Forest Classifier",
+        "n_estimators": 400,
+        "max_depth": 30,
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt",
+        "class_weight": "balanced",
     }
-    
+
     # Dataset information
     dataset_info = {
-        'total_samples': 8763,
-        'features': 19,
-        'training_samples': 7010,
-        'test_samples': 1753,
-        'positive_cases': 1067,
-        'negative_cases': 7696,
-        'positive_percentage': 12.2,
-        'negative_percentage': 87.8
+        "total_samples": 8763,
+        "features": 19,
+        "training_samples": 7010,
+        "test_samples": 1753,
+        "positive_cases": 1067,
+        "negative_cases": 7696,
+        "positive_percentage": 12.2,
+        "negative_percentage": 87.8,
     }
-    
-    return render_template('model_statistics.html', 
-                         performance_metrics=performance_metrics,
-                         confusion_matrix=confusion_matrix,
-                         feature_correlations=feature_correlations,
-                         model_config=model_config,
-                         dataset_info=dataset_info)
+
+    return render_template(
+        "model_statistics.html",
+        performance_metrics=performance_metrics,
+        confusion_matrix=confusion_matrix,
+        feature_correlations=feature_correlations,
+        model_config=model_config,
+        dataset_info=dataset_info,
+    )
+
 
 # Helper function to save your matplotlib plots as images
 def save_model_plots():
@@ -502,20 +1304,20 @@ def save_model_plots():
     Save all your model analysis plots to the static/images directory
     Call this function after training your model to generate all required images
     """
-    import matplotlib.pyplot as plt
     import os
-    
+
     # Ensure the images directory exists
-    os.makedirs('static/images', exist_ok=True)
-    
+    os.makedirs("static/images", exist_ok=True)
+
     # You would save your plots here like:
     # plt.figure(figsize=(12, 5))
     # # Your class weight analysis plot code
     # plt.savefig('static/images/class_weight_analysis.png', dpi=300, bbox_inches='tight')
     # plt.close()
-    
+
     # Repeat for all other plots...
     print("Model plots saved successfully!")
+
 
 # Add new route to get image for food item
 @app.route("/get-food-image/<food_name>")
@@ -1030,103 +1832,103 @@ def diet_plan_page():
         return redirect(url_for("predict"))
 
 
-@app.route("/generate-diet", methods=["POST"])
-def generate_diet():
-    """Generate personalized diet charts based on risk assessment"""
-    try:
-        # Get user preferences
-        is_vegetarian = request.form.get("diet_type") == "vegetarian"
-        num_charts = int(request.form.get("num_charts", 3))
+# @app.route("/generate-diet", methods=["POST"])
+# def generate_diet():
+#     """Generate personalized diet charts based on risk assessment"""
+#     try:
+#         # Get user preferences
+#         is_vegetarian = request.form.get("diet_type") == "vegetarian"
+#         num_charts = int(request.form.get("num_charts", 3))
 
-        # Validate number of charts
-        if num_charts < 1 or num_charts > 10:
-            num_charts = 3
+#         # Validate number of charts
+#         if num_charts < 1 or num_charts > 10:
+#             num_charts = 3
 
-        # Load outcome from session first, then pickle as fallback
-        outcome = None
-        if "prediction_result" in session:
-            outcome = session["prediction_result"]
-        else:
-            with open("static/diet_images/outcome.pkl", "rb") as f:
-                outcome = pickle.load(f)
+#         # Load outcome from session first, then pickle as fallback
+#         outcome = None
+#         if "prediction_result" in session:
+#             outcome = session["prediction_result"]
+#         else:
+#             with open("static/diet_images/outcome.pkl", "rb") as f:
+#                 outcome = pickle.load(f)
 
-        if not diet_plan:
-            flash(
-                "Diet plan data not available. Please check data/Final_diet_plan.json file.",
-                "error",
-            )
-            return redirect(url_for("diet_plan_page"))
+#         if not diet_plan:
+#             flash(
+#                 "Diet plan data not available. Please check data/Final_diet_plan.json file.",
+#                 "error",
+#             )
+#             return redirect(url_for("diet_plan_page"))
 
-        # Get diet recommendation based on risk category
-        risk_category = outcome["risk_category"]
-        diet_type = "vegetarian" if is_vegetarian else "non_vegetarian"
+#         # Get diet recommendation based on risk category
+#         risk_category = outcome["risk_category"]
+#         diet_type = "vegetarian" if is_vegetarian else "non_vegetarian"
 
-        print(f"Generating diet for: {diet_type}, {risk_category}")
+#         print(f"Generating diet for: {diet_type}, {risk_category}")
 
-        try:
-            # Access diet data from JSON structure
-            diet_data = diet_plan["diet_plan"][diet_type][risk_category]
-            print(f"Found diet data with meals: {list(diet_data.keys())}")
-        except KeyError as e:
-            print(f"KeyError accessing diet data: {e}")
-            available_categories = list(
-                diet_plan.get("diet_plan", {}).get(diet_type, {}).keys()
-            )
-            flash(
-                f"No diet plan found for {risk_category}. Available categories: {available_categories}",
-                "error",
-            )
-            return redirect(url_for("diet_plan_page"))
+#         try:
+#             # Access diet data from JSON structure
+#             diet_data = diet_plan["diet_plan"][diet_type][risk_category]
+#             print(f"Found diet data with meals: {list(diet_data.keys())}")
+#         except KeyError as e:
+#             print(f"KeyError accessing diet data: {e}")
+#             available_categories = list(
+#                 diet_plan.get("diet_plan", {}).get(diet_type, {}).keys()
+#             )
+#             flash(
+#                 f"No diet plan found for {risk_category}. Available categories: {available_categories}",
+#                 "error",
+#             )
+#             return redirect(url_for("diet_plan_page"))
 
-        # Generate random diet charts
-        diet_charts = create_random_diet_charts(diet_data, num_charts)
+#         # Generate random diet charts
+#         diet_charts = create_random_diet_charts(diet_data, num_charts)
 
-        if not diet_charts:
-            flash("Could not generate diet charts. Please check diet data.", "error")
-            return redirect(url_for("diet_plan_page"))
+#         if not diet_charts:
+#             flash("Could not generate diet charts. Please check diet data.", "error")
+#             return redirect(url_for("diet_plan_page"))
 
-        # Find recommended chart (one closest to average calories)
-        if len(diet_charts) > 1:
-            total_calories = [chart.get("total_calories", 0) for chart in diet_charts]
-            avg_calories = sum(total_calories) / len(total_calories)
-            closest_chart = min(
-                diet_charts,
-                key=lambda x: abs(x.get("total_calories", 0) - avg_calories),
-            )
-            recommended_chart_num = closest_chart["chart_number"]
-        else:
-            recommended_chart_num = diet_charts[0]["chart_number"]
+#         # Find recommended chart (one closest to average calories)
+#         if len(diet_charts) > 1:
+#             total_calories = [chart.get("total_calories", 0) for chart in diet_charts]
+#             avg_calories = sum(total_calories) / len(total_calories)
+#             closest_chart = min(
+#                 diet_charts,
+#                 key=lambda x: abs(x.get("total_calories", 0) - avg_calories),
+#             )
+#             recommended_chart_num = closest_chart["chart_number"]
+#         else:
+#             recommended_chart_num = diet_charts[0]["chart_number"]
 
-        # Mark recommended chart
-        for chart in diet_charts:
-            chart["is_recommended"] = chart["chart_number"] == recommended_chart_num
+#         # Mark recommended chart
+#         for chart in diet_charts:
+#             chart["is_recommended"] = chart["chart_number"] == recommended_chart_num
 
-        print(
-            f"Generated {len(diet_charts)} diet charts, recommended: Chart {recommended_chart_num}"
-        )
+#         print(
+#             f"Generated {len(diet_charts)} diet charts, recommended: Chart {recommended_chart_num}"
+#         )
 
-        # Store diet charts and preferences in session for PDF generation
-        session["diet_charts"] = diet_charts
-        session["is_vegetarian"] = is_vegetarian
-        session.permanent = True
+#         # Store diet charts and preferences in session for PDF generation
+#         session["diet_charts"] = diet_charts
+#         session["is_vegetarian"] = is_vegetarian
+#         session.permanent = True
 
-        # Start crawling images IMMEDIATELY when diet is generated
-        start_image_crawling_for_diet_optimized(diet_charts)
+#         # Start crawling images IMMEDIATELY when diet is generated
+#         start_image_crawling_for_diet_optimized(diet_charts)
 
-        return render_template(
-            "diet_charts.html",
-            diet_charts=diet_charts,
-            outcome=outcome,
-            is_vegetarian=is_vegetarian,
-        )
+#         return render_template(
+#             "diet_charts.html",
+#             diet_charts=diet_charts,
+#             outcome=outcome,
+#             is_vegetarian=is_vegetarian,
+#         )
 
-    except FileNotFoundError:
-        flash("Please complete heart disease prediction first.", "warning")
-        return redirect(url_for("predict"))
-    except Exception as e:
-        print(f"Error in generate_diet: {e}")
-        flash(f"Error generating diet plan: {str(e)}", "error")
-        return redirect(url_for("diet_plan_page"))
+#     except FileNotFoundError:
+#         flash("Please complete heart disease prediction first.", "warning")
+#         return redirect(url_for("predict"))
+#     except Exception as e:
+#         print(f"Error in generate_diet: {e}")
+#         flash(f"Error generating diet plan: {str(e)}", "error")
+#         return redirect(url_for("diet_plan_page"))
 
 
 @app.route("/new-prediction")
@@ -1137,538 +1939,539 @@ def new_prediction():
     return redirect(url_for("predict"))
 
 
-def create_random_diet_charts(diet_data, num_charts=3):
-    """Create random diet charts from available diet data"""
-    if not diet_data:
-        print("No diet data provided")
-        return []
-
-    # Define meal configuration (items per meal type)
-    meal_config = {"breakfast": 2, "lunch": 3, "snacks": 2, "dinner": 3}
-
-    diet_charts = []
-
-    print(f"Creating {num_charts} diet charts from meals: {list(diet_data.keys())}")
-
-    for chart_num in range(1, num_charts + 1):
-        chart = {"chart_number": chart_num, "total_calories": 0}
-
-        for meal_type, num_items in meal_config.items():
-            if meal_type in diet_data and diet_data[meal_type]:
-                available_items = diet_data[meal_type]
-
-                # Ensure we don't try to sample more items than available
-                items_to_select = min(num_items, len(available_items))
-
-                if items_to_select > 0:
-                    # Randomly select items for this meal
-                    selected_items = random.sample(available_items, items_to_select)
-                    chart[meal_type] = selected_items
-
-                    # Calculate calories for this meal
-                    meal_calories = sum(
-                        item.get("calories", 0) for item in selected_items
-                    )
-                    chart["total_calories"] += meal_calories
-                else:
-                    chart[meal_type] = []
-            else:
-                chart[meal_type] = []
-                print(f"Warning: No {meal_type} data available")
-
-        diet_charts.append(chart)
-
-    return diet_charts
-
-
-@app.route("/download-pdf")
-def download_pdf():
-    """Generate and download professional PDF without images"""
-    try:
-        # Load outcome from session first, then pickle as fallback
-        outcome = None
-        if "prediction_result" in session:
-            outcome = session["prediction_result"]
-        else:
-            try:
-                with open("static/diet_images/outcome.pkl", "rb") as f:
-                    outcome = pickle.load(f)
-            except FileNotFoundError:
-                flash("Please complete heart disease prediction first.", "warning")
-                return redirect(url_for("predict"))
-
-        # Get diet charts from session
-        diet_charts = session.get("diet_charts")
-        if not diet_charts:
-            flash("Please generate diet charts first.", "warning")
-            return redirect(url_for("diet_plan_page"))
-
-        # Add vegetarian preference to outcome for PDF generation
-        outcome["is_vegetarian"] = session.get("is_vegetarian", False)
-
-        # Generate professional PDF
-        buffer = io.BytesIO()
-        generate_diet_pdf_professional(buffer, outcome, diet_charts)
-        buffer.seek(0)
-
-        # Create filename with timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"CarePulse_Diet_Plan_{timestamp}.pdf"
-
-        return send_file(
-            buffer,
-            as_attachment=True,
-            download_name=filename,
-            mimetype="application/pdf",
-        )
-
-    except Exception as e:
-        print(f"Error generating PDF: {e}")
-        import traceback
-
-        traceback.print_exc()
-        flash(f"Error generating PDF: {str(e)}", "error")
-        return redirect(url_for("diet_plan_page"))
-
-
-def generate_diet_pdf_professional(buffer, outcome, diet_charts):
-    """Generate a clean, professional PDF with proper formatting and spacing"""
-    from reportlab.platypus import KeepTogether, CondPageBreak
-    from reportlab.lib.units import inch
-    
-    # Create PDF document with better margins
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        rightMargin=20 * mm,
-        leftMargin=20 * mm,
-        topMargin=20 * mm,
-        bottomMargin=20 * mm,
-    )
-
-    # Define professional colors
-    primary_color = HexColor("#1f2937")  # Dark gray
-    accent_color = HexColor("#3b82f6")  # Blue
-    success_color = HexColor("#059669")  # Green
-    warning_color = HexColor("#d97706")  # Orange
-    danger_color = HexColor("#dc2626")  # Red
-    light_gray = HexColor("#f9fafb")
-    border_color = HexColor("#e5e7eb")
-
-    risk_color_map = {
-        "success": success_color,
-        "warning": warning_color,
-        "danger": danger_color,
-        "primary": accent_color,
-    }
-
-    # Professional styles with better spacing
-    styles = getSampleStyleSheet()
-
-    title_style = ParagraphStyle(
-        "ProfessionalTitle",
-        parent=styles["Heading1"],
-        fontSize=28,
-        spaceAfter=30,
-        spaceBefore=20,
-        alignment=TA_CENTER,
-        textColor=primary_color,
-        fontName="Helvetica-Bold",
-        leading=34,
-    )
-
-    subtitle_style = ParagraphStyle(
-        "ProfessionalSubtitle",
-        parent=styles["Heading2"],
-        fontSize=18,
-        spaceAfter=20,
-        spaceBefore=10,
-        alignment=TA_CENTER,
-        textColor=accent_color,
-        fontName="Helvetica",
-        leading=22,
-    )
-
-    section_header_style = ParagraphStyle(
-        "SectionHeader",
-        parent=styles["Heading2"],
-        fontSize=16,
-        spaceAfter=15,
-        spaceBefore=25,
-        textColor=primary_color,
-        fontName="Helvetica-Bold",
-        borderWidth=1,
-        borderColor=accent_color,
-        borderPadding=12,
-        backColor=light_gray,
-        leading=20,
-        keepWithNext=True,  # Prevent orphaned headers
-    )
-
-    normal_style = ParagraphStyle(
-        "ProfessionalNormal",
-        parent=styles["Normal"],
-        fontSize=11,
-        spaceAfter=8,
-        spaceBefore=4,
-        fontName="Helvetica",
-        leading=16,
-        leftIndent=0,
-        rightIndent=0,
-    )
-
-    meal_header_style = ParagraphStyle(
-        "MealHeader",
-        parent=styles["Heading3"],
-        fontSize=14,
-        spaceAfter=10,
-        spaceBefore=15,
-        textColor=accent_color,
-        fontName="Helvetica-Bold",
-        leading=18,
-        keepWithNext=True,
-    )
-
-    info_style = ParagraphStyle(
-        "InfoStyle",
-        parent=normal_style,
-        fontSize=10,
-        textColor=HexColor("#6b7280"),
-        alignment=TA_CENTER,
-        spaceAfter=12,
-        spaceBefore=8,
-    )
-
-    story = []
-
-    # ===== HEADER SECTION =====
-    story.append(Spacer(1, 0.5 * inch))
-    story.append(Paragraph("CarePulse", title_style))
-    story.append(Paragraph("Personalized Diet Plan Report", subtitle_style))
-    
-    generation_date = datetime.now().strftime("%B %d, %Y at %I:%M %p")
-    story.append(Paragraph(f"Generated on: {generation_date}", info_style))
-    story.append(Spacer(1, 0.4 * inch))
-
-    # ===== PATIENT INFORMATION SECTION =====
-    story.append(Paragraph("Patient Information", section_header_style))
-
-    patient_data = [
-        ["Parameter", "Value"],
-        ["Name", "Patient"],
-        ["Age", f"{outcome['user_data']['age']} years"],
-        ["Gender", outcome["user_data"]["gender"]],
-        ["BMI", f"{outcome['user_data']['bmi']}"],
-        [
-            "Diet Type",
-            "Vegetarian" if outcome.get("is_vegetarian", False) else "Non-Vegetarian",
-        ],
-    ]
-
-    patient_table = Table(patient_data, colWidths=[3.2 * inch, 2.8 * inch])
-    patient_table.setStyle(
-        TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), accent_color),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, -1), 11),
-            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-            ("BACKGROUND", (0, 1), (-1, -1), light_gray),
-            ("GRID", (0, 0), (-1, -1), 1, border_color),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("LEFTPADDING", (0, 0), (-1, -1), 12),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-            ("TOPPADDING", (0, 0), (-1, -1), 10),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-        ])
-    )
-
-    story.append(KeepTogether([patient_table]))
-    story.append(Spacer(1, 0.3 * inch))
-
-    # ===== RISK ASSESSMENT SECTION =====
-    story.append(Paragraph("Risk Assessment", section_header_style))
-
-    risk_data = [
-        ["Assessment Parameter", "Result"],
-        ["Heart Disease Risk Level", outcome["risk_level"]],
-        ["Risk Probability", f"{outcome['risk_probability']}%"],
-        ["Confidence Level", outcome["confidence_level"]],
-        ["Risk Category", outcome["risk_category"].replace("_", " ").title()],
-    ]
-
-    risk_table = Table(risk_data, colWidths=[3.2 * inch, 2.8 * inch])
-    risk_table.setStyle(
-        TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), accent_color),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, -1), 11),
-            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-            ("BACKGROUND", (0, 1), (-1, -1), light_gray),
-            ("GRID", (0, 0), (-1, -1), 1, border_color),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("LEFTPADDING", (0, 0), (-1, -1), 12),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-            ("TOPPADDING", (0, 0), (-1, -1), 10),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-            # Highlight risk level row
-            ("BACKGROUND", (1, 1), (1, 1), risk_color_map.get(outcome["risk_color"], accent_color)),
-            ("TEXTCOLOR", (1, 1), (1, 1), colors.white),
-            ("FONTNAME", (1, 1), (1, 1), "Helvetica-Bold"),
-        ])
-    )
-
-    story.append(KeepTogether([risk_table]))
-    story.append(Spacer(1, 0.3 * inch))
-
-    # ===== DIET PLAN OVERVIEW =====
-    story.append(Paragraph("Diet Plan Overview", section_header_style))
-
-    total_charts = len(diet_charts)
-    calories_list = [chart["total_calories"] for chart in diet_charts]
-    avg_calories = sum(calories_list) / len(calories_list) if calories_list else 0
-    min_calories = min(calories_list) if calories_list else 0
-    max_calories = max(calories_list) if calories_list else 0
-    recommended_chart = next(
-        (i + 1 for i, chart in enumerate(diet_charts) if chart.get("is_recommended")), 1
-    )
-
-    overview_data = [
-        ["Plan Details", "Information"],
-        ["Total Diet Charts", str(total_charts)],
-        ["Recommended Chart", f"Chart #{recommended_chart}"],
-        ["Average Daily Calories", f"{avg_calories:.0f} calories"],
-        ["Calorie Range", f"{min_calories} - {max_calories} calories"],
-        ["Plan Duration", "Daily meal plans"],
-    ]
-
-    overview_table = Table(overview_data, colWidths=[3.2 * inch, 2.8 * inch])
-    overview_table.setStyle(
-        TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), accent_color),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, -1), 11),
-            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-            ("BACKGROUND", (0, 1), (-1, -1), light_gray),
-            ("GRID", (0, 0), (-1, -1), 1, border_color),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("LEFTPADDING", (0, 0), (-1, -1), 12),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-            ("TOPPADDING", (0, 0), (-1, -1), 10),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-        ])
-    )
-
-    story.append(KeepTogether([overview_table]))
-
-    # ===== PAGE BREAK BEFORE DIET CHARTS =====
-    story.append(PageBreak())
-
-    # ===== INDIVIDUAL DIET CHARTS =====
-    for i, chart in enumerate(diet_charts):
-        # Start each chart on a new page
-        if i > 0:
-            story.append(PageBreak())
-
-        # Chart header with better spacing
-        chart_title = f"Diet Chart #{chart['chart_number']}"
-        if chart.get("is_recommended"):
-            chart_title += " - RECOMMENDED"
-
-        story.append(Paragraph(chart_title, section_header_style))
-
-        # Total calories info
-        calories_info = ParagraphStyle(
-            "CaloriesInfo",
-            parent=normal_style,
-            fontSize=13,
-            fontName="Helvetica-Bold",
-            textColor=accent_color,
-            spaceAfter=15,
-            spaceBefore=5,
-        )
-        story.append(
-            Paragraph(
-                f"Total Daily Calories: {chart['total_calories']} calories",
-                calories_info,
-            )
-        )
-
-        # Process each meal with better organization
-        meal_sections = [
-            ("breakfast", "Breakfast", warning_color),
-            ("lunch", "Lunch", accent_color),
-            ("snacks", "Snacks", success_color),
-            ("dinner", "Dinner", primary_color),
-        ]
-
-        chart_elements = []  # Collect all elements for this chart
-        
-        for meal_key, meal_name, meal_color in meal_sections:
-            meal_items = chart.get(meal_key, [])
-            if not meal_items:
-                continue
-
-            # Calculate meal calories
-            meal_calories = sum(item.get("calories", 0) for item in meal_items)
-
-            # Meal header
-            meal_title = f"{meal_name} ({meal_calories} calories)"
-            meal_header_para = Paragraph(meal_title, meal_header_style)
-            
-            # Create meal items table with better sizing
-            meal_table_data = [["Food Item", "Calories", "Notes"]]
-
-            for item in meal_items:
-                food_name = item.get("name", "Unknown")
-                calories = item.get("calories", 0)
-                notes = item.get("notes", item.get("description", ""))
-                # Limit notes length to prevent overflow
-                if len(notes) > 50:
-                    notes = notes[:47] + "..."
-
-                meal_table_data.append([food_name, f"{calories}", notes])
-
-            meal_table = Table(
-                meal_table_data, 
-                colWidths=[3.0 * inch, 0.8 * inch, 2.2 * inch],
-                repeatRows=1  # Repeat header if table splits
-            )
-            meal_table.setStyle(
-                TableStyle([
-                    ("BACKGROUND", (0, 0), (-1, 0), meal_color),
-                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                    ("FONTSIZE", (0, 0), (-1, -1), 10),
-                    ("ALIGN", (0, 0), (0, -1), "LEFT"),
-                    ("ALIGN", (1, 1), (1, -1), "CENTER"),
-                    ("ALIGN", (2, 1), (2, -1), "LEFT"),
-                    ("BACKGROUND", (0, 1), (-1, -1), colors.white),
-                    ("GRID", (0, 0), (-1, -1), 0.5, border_color),
-                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("LEFTPADDING", (0, 0), (-1, -1), 8),
-                    ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-                    ("TOPPADDING", (0, 0), (-1, -1), 8),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-                    # Alternate row colors
-                    ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, HexColor("#f8fafc")]),
-                ])
-            )
-
-            # Keep meal header with its table
-            chart_elements.append(KeepTogether([
-                meal_header_para,
-                Spacer(1, 5),
-                meal_table,
-                Spacer(1, 15)
-            ]))
-
-        # Add all chart elements
-        story.extend(chart_elements)
-
-    # ===== PAGE BREAK BEFORE RECOMMENDATIONS =====
-    story.append(PageBreak())
-
-    # ===== RECOMMENDATIONS SECTION =====
-    story.append(Paragraph("Health & Dietary Recommendations", section_header_style))
-
-    recommendations = get_recommendations_by_risk(outcome["risk_category"])
-
-    recommendation_elements = []
-    for i, recommendation in enumerate(recommendations, 1):
-        rec_style = ParagraphStyle(
-            "RecommendationStyle",
-            parent=normal_style,
-            leftIndent=15,
-            bulletIndent=5,
-            spaceAfter=10,
-            spaceBefore=5,
-        )
-        recommendation_elements.append(
-            Paragraph(f"{i}. {recommendation}", rec_style)
-        )
-
-    story.extend(recommendation_elements)
-    story.append(Spacer(1, 0.3 * inch))
-
-    # ===== IMPORTANT NOTES SECTION =====
-    story.append(Paragraph("Important Guidelines", section_header_style))
-
-    guidelines = [
-        "Follow the recommended portion sizes for optimal results.",
-        "Drink at least 8-10 glasses of water throughout the day.",
-        "Maintain regular meal timings as suggested in the charts.",
-        "Include physical activity as recommended by your healthcare provider.",
-        "Monitor your body's response to the diet plan and adjust as needed.",
-    ]
-
-    guideline_elements = []
-    for guideline in guidelines:
-        guideline_style = ParagraphStyle(
-            "GuidelineStyle",
-            parent=normal_style,
-            leftIndent=15,
-            bulletIndent=5,
-            spaceAfter=8,
-            spaceBefore=4,
-        )
-        guideline_elements.append(
-            Paragraph(f"• {guideline}", guideline_style)
-        )
-
-    story.extend(guideline_elements)
-    story.append(Spacer(1, 0.3 * inch))
-
-    # ===== DISCLAIMER SECTION =====
-    disclaimer_style = ParagraphStyle(
-        "Disclaimer",
-        parent=normal_style,
-        fontSize=10,
-        textColor=HexColor("#6b7280"),
-        borderWidth=1,
-        borderColor=border_color,
-        borderPadding=15,
-        backColor=HexColor("#fef2f2"),
-        spaceAfter=20,
-        spaceBefore=10,
-        leading=14,
-    )
-
-    disclaimer_text = """
-    <b>Medical Disclaimer:</b> This diet plan is generated based on risk assessment algorithms and is for 
-    informational purposes only. It should not replace professional medical advice, diagnosis, or treatment. 
-    Always consult with a qualified healthcare provider or registered dietitian before making significant 
-    changes to your diet, especially if you have existing health conditions, allergies, or are taking medications.
-    """
-
-    story.append(Paragraph(disclaimer_text, disclaimer_style))
-
-    # ===== FOOTER =====
-    footer_style = ParagraphStyle(
-        "Footer",
-        parent=normal_style,
-        fontSize=9,
-        alignment=TA_CENTER,
-        textColor=HexColor("#9ca3af"),
-        spaceAfter=5,
-        spaceBefore=10,
-    )
-
-    story.append(Spacer(1, 0.2 * inch))
-    story.append(
-        Paragraph(
-            "Generated by CarePulse - Your Digital Health Companion", footer_style
-        )
-    )
-    story.append(
-        Paragraph(f"Report ID: {datetime.now().strftime('%Y%m%d%H%M%S')}", footer_style)
-    )
-
-    # Build the PDF with better frame settings
-    doc.build(story)
-    return buffer
+# def create_random_diet_charts(diet_data, num_charts=3):
+#     """Create random diet charts from available diet data"""
+#     if not diet_data:
+#         print("No diet data provided")
+#         return []
+
+#     # Define meal configuration (items per meal type)
+#     meal_config = {"breakfast": 2, "lunch": 3, "snacks": 2, "dinner": 3}
+
+#     diet_charts = []
+
+#     print(f"Creating {num_charts} diet charts from meals: {list(diet_data.keys())}")
+
+#     for chart_num in range(1, num_charts + 1):
+#         chart = {"chart_number": chart_num, "total_calories": 0}
+
+#         for meal_type, num_items in meal_config.items():
+#             if meal_type in diet_data and diet_data[meal_type]:
+#                 available_items = diet_data[meal_type]
+
+#                 # Ensure we don't try to sample more items than available
+#                 items_to_select = min(num_items, len(available_items))
+
+#                 if items_to_select > 0:
+#                     # Randomly select items for this meal
+#                     selected_items = random.sample(available_items, items_to_select)
+#                     chart[meal_type] = selected_items
+
+#                     # Calculate calories for this meal
+#                     meal_calories = sum(
+#                         item.get("calories", 0) for item in selected_items
+#                     )
+#                     chart["total_calories"] += meal_calories
+#                 else:
+#                     chart[meal_type] = []
+#             else:
+#                 chart[meal_type] = []
+#                 print(f"Warning: No {meal_type} data available")
+
+#         diet_charts.append(chart)
+
+#     return diet_charts
+
+
+# @app.route("/download-pdf")
+# def download_pdf():
+#     """Generate and download professional PDF without images"""
+#     try:
+#         # Load outcome from session first, then pickle as fallback
+#         outcome = None
+#         if "prediction_result" in session:
+#             outcome = session["prediction_result"]
+#         else:
+#             try:
+#                 with open("static/diet_images/outcome.pkl", "rb") as f:
+#                     outcome = pickle.load(f)
+#             except FileNotFoundError:
+#                 flash("Please complete heart disease prediction first.", "warning")
+#                 return redirect(url_for("predict"))
+
+#         # Get diet charts from session
+#         diet_charts = session.get("diet_charts")
+#         if not diet_charts:
+#             flash("Please generate diet charts first.", "warning")
+#             return redirect(url_for("diet_plan_page"))
+
+#         # Add vegetarian preference to outcome for PDF generation
+#         outcome["is_vegetarian"] = session.get("is_vegetarian", False)
+
+#         # Generate professional PDF
+#         buffer = io.BytesIO()
+#         generate_diet_pdf_professional(buffer, outcome, diet_charts)
+#         buffer.seek(0)
+
+#         # Create filename with timestamp
+#         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#         filename = f"CarePulse_Diet_Plan_{timestamp}.pdf"
+
+#         return send_file(
+#             buffer,
+#             as_attachment=True,
+#             download_name=filename,
+#             mimetype="application/pdf",
+#         )
+
+#     except Exception as e:
+#         print(f"Error generating PDF: {e}")
+#         import traceback
+
+#         traceback.print_exc()
+#         flash(f"Error generating PDF: {str(e)}", "error")
+#         return redirect(url_for("diet_plan_page"))
+
+
+# def generate_diet_pdf_professional(buffer, outcome, diet_charts):
+#     """Generate a clean, professional PDF with proper formatting and spacing"""
+#     from reportlab.platypus import KeepTogether, CondPageBreak
+#     from reportlab.lib.units import inch
+
+#     # Create PDF document with better margins
+#     doc = SimpleDocTemplate(
+#         buffer,
+#         pagesize=A4,
+#         rightMargin=20 * mm,
+#         leftMargin=20 * mm,
+#         topMargin=20 * mm,
+#         bottomMargin=20 * mm,
+#     )
+
+#     # Define professional colors
+#     primary_color = HexColor("#1f2937")  # Dark gray
+#     accent_color = HexColor("#3b82f6")  # Blue
+#     success_color = HexColor("#059669")  # Green
+#     warning_color = HexColor("#d97706")  # Orange
+#     danger_color = HexColor("#dc2626")  # Red
+#     light_gray = HexColor("#f9fafb")
+#     border_color = HexColor("#e5e7eb")
+
+#     risk_color_map = {
+#         "success": success_color,
+#         "warning": warning_color,
+#         "danger": danger_color,
+#         "primary": accent_color,
+#     }
+
+#     # Professional styles with better spacing
+#     styles = getSampleStyleSheet()
+
+#     title_style = ParagraphStyle(
+#         "ProfessionalTitle",
+#         parent=styles["Heading1"],
+#         fontSize=28,
+#         spaceAfter=30,
+#         spaceBefore=20,
+#         alignment=TA_CENTER,
+#         textColor=primary_color,
+#         fontName="Helvetica-Bold",
+#         leading=34,
+#     )
+
+#     subtitle_style = ParagraphStyle(
+#         "ProfessionalSubtitle",
+#         parent=styles["Heading2"],
+#         fontSize=18,
+#         spaceAfter=20,
+#         spaceBefore=10,
+#         alignment=TA_CENTER,
+#         textColor=accent_color,
+#         fontName="Helvetica",
+#         leading=22,
+#     )
+
+#     section_header_style = ParagraphStyle(
+#         "SectionHeader",
+#         parent=styles["Heading2"],
+#         fontSize=16,
+#         spaceAfter=15,
+#         spaceBefore=25,
+#         textColor=primary_color,
+#         fontName="Helvetica-Bold",
+#         borderWidth=1,
+#         borderColor=accent_color,
+#         borderPadding=12,
+#         backColor=light_gray,
+#         leading=20,
+#         keepWithNext=True,  # Prevent orphaned headers
+#     )
+
+#     normal_style = ParagraphStyle(
+#         "ProfessionalNormal",
+#         parent=styles["Normal"],
+#         fontSize=11,
+#         spaceAfter=8,
+#         spaceBefore=4,
+#         fontName="Helvetica",
+#         leading=16,
+#         leftIndent=0,
+#         rightIndent=0,
+#     )
+
+#     meal_header_style = ParagraphStyle(
+#         "MealHeader",
+#         parent=styles["Heading3"],
+#         fontSize=14,
+#         spaceAfter=10,
+#         spaceBefore=15,
+#         textColor=accent_color,
+#         fontName="Helvetica-Bold",
+#         leading=18,
+#         keepWithNext=True,
+#     )
+
+#     info_style = ParagraphStyle(
+#         "InfoStyle",
+#         parent=normal_style,
+#         fontSize=10,
+#         textColor=HexColor("#6b7280"),
+#         alignment=TA_CENTER,
+#         spaceAfter=12,
+#         spaceBefore=8,
+#     )
+
+#     story = []
+
+#     # ===== HEADER SECTION =====
+#     story.append(Spacer(1, 0.5 * inch))
+#     story.append(Paragraph("CarePulse", title_style))
+#     story.append(Paragraph("Personalized Diet Plan Report", subtitle_style))
+
+#     generation_date = datetime.now().strftime("%B %d, %Y at %I:%M %p")
+#     story.append(Paragraph(f"Generated on: {generation_date}", info_style))
+#     story.append(Spacer(1, 0.4 * inch))
+
+#     # ===== PATIENT INFORMATION SECTION =====
+#     story.append(Paragraph("Patient Information", section_header_style))
+
+#     patient_data = [
+#         ["Parameter", "Value"],
+#         ["Name", "Patient"],
+#         ["Age", f"{outcome['user_data']['age']} years"],
+#         ["Gender", outcome["user_data"]["gender"]],
+#         ["BMI", f"{outcome['user_data']['bmi']}"],
+#         [
+#             "Diet Type",
+#             "Vegetarian" if outcome.get("is_vegetarian", False) else "Non-Vegetarian",
+#         ],
+#     ]
+
+#     patient_table = Table(patient_data, colWidths=[3.2 * inch, 2.8 * inch])
+#     patient_table.setStyle(
+#         TableStyle([
+#             ("BACKGROUND", (0, 0), (-1, 0), accent_color),
+#             ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+#             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+#             ("FONTSIZE", (0, 0), (-1, -1), 11),
+#             ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+#             ("BACKGROUND", (0, 1), (-1, -1), light_gray),
+#             ("GRID", (0, 0), (-1, -1), 1, border_color),
+#             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+#             ("LEFTPADDING", (0, 0), (-1, -1), 12),
+#             ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+#             ("TOPPADDING", (0, 0), (-1, -1), 10),
+#             ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+#         ])
+#     )
+
+#     story.append(KeepTogether([patient_table]))
+#     story.append(Spacer(1, 0.3 * inch))
+
+#     # ===== RISK ASSESSMENT SECTION =====
+#     story.append(Paragraph("Risk Assessment", section_header_style))
+
+#     risk_data = [
+#         ["Assessment Parameter", "Result"],
+#         ["Heart Disease Risk Level", outcome["risk_level"]],
+#         ["Risk Probability", f"{outcome['risk_probability']}%"],
+#         ["Confidence Level", outcome["confidence_level"]],
+#         ["Risk Category", outcome["risk_category"].replace("_", " ").title()],
+#     ]
+
+#     risk_table = Table(risk_data, colWidths=[3.2 * inch, 2.8 * inch])
+#     risk_table.setStyle(
+#         TableStyle([
+#             ("BACKGROUND", (0, 0), (-1, 0), accent_color),
+#             ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+#             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+#             ("FONTSIZE", (0, 0), (-1, -1), 11),
+#             ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+#             ("BACKGROUND", (0, 1), (-1, -1), light_gray),
+#             ("GRID", (0, 0), (-1, -1), 1, border_color),
+#             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+#             ("LEFTPADDING", (0, 0), (-1, -1), 12),
+#             ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+#             ("TOPPADDING", (0, 0), (-1, -1), 10),
+#             ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+#             # Highlight risk level row
+#             ("BACKGROUND", (1, 1), (1, 1), risk_color_map.get(outcome["risk_color"], accent_color)),
+#             ("TEXTCOLOR", (1, 1), (1, 1), colors.white),
+#             ("FONTNAME", (1, 1), (1, 1), "Helvetica-Bold"),
+#         ])
+#     )
+
+#     story.append(KeepTogether([risk_table]))
+#     story.append(Spacer(1, 0.3 * inch))
+
+#     # ===== DIET PLAN OVERVIEW =====
+#     story.append(Paragraph("Diet Plan Overview", section_header_style))
+
+#     total_charts = len(diet_charts)
+#     calories_list = [chart["total_calories"] for chart in diet_charts]
+#     avg_calories = sum(calories_list) / len(calories_list) if calories_list else 0
+#     min_calories = min(calories_list) if calories_list else 0
+#     max_calories = max(calories_list) if calories_list else 0
+#     recommended_chart = next(
+#         (i + 1 for i, chart in enumerate(diet_charts) if chart.get("is_recommended")), 1
+#     )
+
+#     overview_data = [
+#         ["Plan Details", "Information"],
+#         ["Total Diet Charts", str(total_charts)],
+#         ["Recommended Chart", f"Chart #{recommended_chart}"],
+#         ["Average Daily Calories", f"{avg_calories:.0f} calories"],
+#         ["Calorie Range", f"{min_calories} - {max_calories} calories"],
+#         ["Plan Duration", "Daily meal plans"],
+#     ]
+
+#     overview_table = Table(overview_data, colWidths=[3.2 * inch, 2.8 * inch])
+#     overview_table.setStyle(
+#         TableStyle([
+#             ("BACKGROUND", (0, 0), (-1, 0), accent_color),
+#             ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+#             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+#             ("FONTSIZE", (0, 0), (-1, -1), 11),
+#             ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+#             ("BACKGROUND", (0, 1), (-1, -1), light_gray),
+#             ("GRID", (0, 0), (-1, -1), 1, border_color),
+#             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+#             ("LEFTPADDING", (0, 0), (-1, -1), 12),
+#             ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+#             ("TOPPADDING", (0, 0), (-1, -1), 10),
+#             ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+#         ])
+#     )
+
+#     story.append(KeepTogether([overview_table]))
+
+#     # ===== PAGE BREAK BEFORE DIET CHARTS =====
+#     story.append(PageBreak())
+
+#     # ===== INDIVIDUAL DIET CHARTS =====
+#     for i, chart in enumerate(diet_charts):
+#         # Start each chart on a new page
+#         if i > 0:
+#             story.append(PageBreak())
+
+#         # Chart header with better spacing
+#         chart_title = f"Diet Chart #{chart['chart_number']}"
+#         if chart.get("is_recommended"):
+#             chart_title += " - RECOMMENDED"
+
+#         story.append(Paragraph(chart_title, section_header_style))
+
+#         # Total calories info
+#         calories_info = ParagraphStyle(
+#             "CaloriesInfo",
+#             parent=normal_style,
+#             fontSize=13,
+#             fontName="Helvetica-Bold",
+#             textColor=accent_color,
+#             spaceAfter=15,
+#             spaceBefore=5,
+#         )
+#         story.append(
+#             Paragraph(
+#                 f"Total Daily Calories: {chart['total_calories']} calories",
+#                 calories_info,
+#             )
+#         )
+
+#         # Process each meal with better organization
+#         meal_sections = [
+#             ("breakfast", "Breakfast", warning_color),
+#             ("lunch", "Lunch", accent_color),
+#             ("snacks", "Snacks", success_color),
+#             ("dinner", "Dinner", primary_color),
+#         ]
+
+#         chart_elements = []  # Collect all elements for this chart
+
+#         for meal_key, meal_name, meal_color in meal_sections:
+#             meal_items = chart.get(meal_key, [])
+#             if not meal_items:
+#                 continue
+
+#             # Calculate meal calories
+#             meal_calories = sum(item.get("calories", 0) for item in meal_items)
+
+#             # Meal header
+#             meal_title = f"{meal_name} ({meal_calories} calories)"
+#             meal_header_para = Paragraph(meal_title, meal_header_style)
+
+#             # Create meal items table with better sizing
+#             meal_table_data = [["Food Item", "Calories", "Notes"]]
+
+#             for item in meal_items:
+#                 food_name = item.get("name", "Unknown")
+#                 calories = item.get("calories", 0)
+#                 notes = item.get("notes", item.get("description", ""))
+#                 # Limit notes length to prevent overflow
+#                 if len(notes) > 50:
+#                     notes = notes[:47] + "..."
+
+#                 meal_table_data.append([food_name, f"{calories}", notes])
+
+#             meal_table = Table(
+#                 meal_table_data,
+#                 colWidths=[3.0 * inch, 0.8 * inch, 2.2 * inch],
+#                 repeatRows=1  # Repeat header if table splits
+#             )
+#             meal_table.setStyle(
+#                 TableStyle([
+#                     ("BACKGROUND", (0, 0), (-1, 0), meal_color),
+#                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+#                     ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+#                     ("FONTSIZE", (0, 0), (-1, -1), 10),
+#                     ("ALIGN", (0, 0), (0, -1), "LEFT"),
+#                     ("ALIGN", (1, 1), (1, -1), "CENTER"),
+#                     ("ALIGN", (2, 1), (2, -1), "LEFT"),
+#                     ("BACKGROUND", (0, 1), (-1, -1), colors.white),
+#                     ("GRID", (0, 0), (-1, -1), 0.5, border_color),
+#                     ("VALIGN", (0, 0), (-1, -1), "TOP"),
+#                     ("LEFTPADDING", (0, 0), (-1, -1), 8),
+#                     ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+#                     ("TOPPADDING", (0, 0), (-1, -1), 8),
+#                     ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+#                     # Alternate row colors
+#                     ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, HexColor("#f8fafc")]),
+#                 ])
+#             )
+
+#             # Keep meal header with its table
+#             chart_elements.append(KeepTogether([
+#                 meal_header_para,
+#                 Spacer(1, 5),
+#                 meal_table,
+#                 Spacer(1, 15)
+#             ]))
+
+#         # Add all chart elements
+#         story.extend(chart_elements)
+
+#     # ===== PAGE BREAK BEFORE RECOMMENDATIONS =====
+#     story.append(PageBreak())
+
+#     # ===== RECOMMENDATIONS SECTION =====
+#     story.append(Paragraph("Health & Dietary Recommendations", section_header_style))
+
+#     recommendations = get_recommendations_by_risk(outcome["risk_category"])
+
+#     recommendation_elements = []
+#     for i, recommendation in enumerate(recommendations, 1):
+#         rec_style = ParagraphStyle(
+#             "RecommendationStyle",
+#             parent=normal_style,
+#             leftIndent=15,
+#             bulletIndent=5,
+#             spaceAfter=10,
+#             spaceBefore=5,
+#         )
+#         recommendation_elements.append(
+#             Paragraph(f"{i}. {recommendation}", rec_style)
+#         )
+
+#     story.extend(recommendation_elements)
+#     story.append(Spacer(1, 0.3 * inch))
+
+#     # ===== IMPORTANT NOTES SECTION =====
+#     story.append(Paragraph("Important Guidelines", section_header_style))
+
+#     guidelines = [
+#         "Follow the recommended portion sizes for optimal results.",
+#         "Drink at least 8-10 glasses of water throughout the day.",
+#         "Maintain regular meal timings as suggested in the charts.",
+#         "Include physical activity as recommended by your healthcare provider.",
+#         "Monitor your body's response to the diet plan and adjust as needed.",
+#     ]
+
+#     guideline_elements = []
+#     for guideline in guidelines:
+#         guideline_style = ParagraphStyle(
+#             "GuidelineStyle",
+#             parent=normal_style,
+#             leftIndent=15,
+#             bulletIndent=5,
+#             spaceAfter=8,
+#             spaceBefore=4,
+#         )
+#         guideline_elements.append(
+#             Paragraph(f"• {guideline}", guideline_style)
+#         )
+
+#     story.extend(guideline_elements)
+#     story.append(Spacer(1, 0.3 * inch))
+
+#     # ===== DISCLAIMER SECTION =====
+#     disclaimer_style = ParagraphStyle(
+#         "Disclaimer",
+#         parent=normal_style,
+#         fontSize=10,
+#         textColor=HexColor("#6b7280"),
+#         borderWidth=1,
+#         borderColor=border_color,
+#         borderPadding=15,
+#         backColor=HexColor("#fef2f2"),
+#         spaceAfter=20,
+#         spaceBefore=10,
+#         leading=14,
+#     )
+
+#     disclaimer_text = """
+#     <b>Medical Disclaimer:</b> This diet plan is generated based on risk assessment algorithms and is for
+#     informational purposes only. It should not replace professional medical advice, diagnosis, or treatment.
+#     Always consult with a qualified healthcare provider or registered dietitian before making significant
+#     changes to your diet, especially if you have existing health conditions, allergies, or are taking medications.
+#     """
+
+#     story.append(Paragraph(disclaimer_text, disclaimer_style))
+
+#     # ===== FOOTER =====
+#     footer_style = ParagraphStyle(
+#         "Footer",
+#         parent=normal_style,
+#         fontSize=9,
+#         alignment=TA_CENTER,
+#         textColor=HexColor("#9ca3af"),
+#         spaceAfter=5,
+#         spaceBefore=10,
+#     )
+
+#     story.append(Spacer(1, 0.2 * inch))
+#     story.append(
+#         Paragraph(
+#             "Generated by CarePulse - Your Digital Health Companion", footer_style
+#         )
+#     )
+#     story.append(
+#         Paragraph(f"Report ID: {datetime.now().strftime('%Y%m%d%H%M%S')}", footer_style)
+#     )
+
+#     # Build the PDF with better frame settings
+#     doc.build(story)
+#     return buffer
+
 
 def get_recommendations_by_risk(risk_category):
     """Get detailed recommendations based on risk level"""
