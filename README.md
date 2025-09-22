@@ -1,4 +1,4 @@
-# 🫀 Heart Disease Prediction with Personalized Diet Plan & Web Interface
+# 🫀 Heart Disease Prediction with Personalized Diet Plan
 
 ![Project Banner](assets/banner.jpg)
 
